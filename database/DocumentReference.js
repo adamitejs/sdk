@@ -20,7 +20,7 @@ class DocumentReference {
     return app.service('database');
   }
 
-  async set(data) {
+  async update(data) {
     return new Promise((resolve, reject) => {
       this.database.client.emit('command', {
         name: 'database.updateDocument',
