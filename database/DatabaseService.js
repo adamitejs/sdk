@@ -16,6 +16,11 @@ class DatabaseService {
       this.app.log('database', 'disconnected');
       console.log(r);
     });
+
+    this.client.on('error', (r) => {
+      this.app.log('database', 'error');
+      console.log(r);
+    });
   }
   
   database(name = 'default') {

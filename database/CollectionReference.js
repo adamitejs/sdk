@@ -1,4 +1,5 @@
 const App = require('../app/App');
+const DocumentSnapshot = require('./DocumentSnapshot');
 const DocumentReference = require('./DocumentReference');
 const CollectionSnapshot = require('./CollectionSnapshot');
 
@@ -10,10 +11,7 @@ class CollectionReference {
   }
 
   get path() {
-    return [
-      this.database.path,
-      this.name
-    ].join('/');
+    return this.database.path + "/" + this.name;
   }
 
   doc(name) {
@@ -33,6 +31,24 @@ class CollectionReference {
           reject(snapshot.error);
         } else {
           resolve(CollectionSnapshot.fromServerSnapshot(this, snapshot));
+        }
+      });
+    });
+  }
+
+  async add(data) {
+    return new Promise((resolve, reject) => {
+      const app = App.getApp(this.database.service.app.name);
+      const database = app.service('database');
+      
+      database.client.emit('command', {
+        name: 'database.createDocument',
+        args: { ref: this.path, data: data }
+      }, (snapshot) => {
+        if (snapshot.error) {
+          reject(snapshot.error);
+        } else {
+          resolve(DocumentSnapshot.fromServerSnapshot(this, snapshot));
         }
       });
     });
