@@ -48,7 +48,7 @@ class CollectionReference {
         if (snapshot.error) {
           reject(snapshot.error);
         } else {
-          resolve(DocumentSnapshot.fromServerSnapshot(this, snapshot));
+          resolve(DocumentSnapshot.fromServerSnapshot(this.doc(snapshot.data.id), snapshot));
         }
       });
     });

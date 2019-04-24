@@ -50,6 +50,21 @@ class DocumentReference {
     });
   }
 
+  async delete() {
+    return new Promise((resolve, reject) => {
+      this.database.client.emit('command', {
+        name: 'database.deleteDocument',
+        args: { ref: this.path }
+      }, (snapshot) => {
+        if (snapshot.error) {
+          reject(snapshot.error);
+        } else {
+          resolve(this);
+        }
+      });
+    });
+  }
+
   onSnapshot(handler) {
     this.subscribeToChanges();
     this.handlers.push(handler);
