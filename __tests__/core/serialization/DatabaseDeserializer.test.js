@@ -11,7 +11,7 @@ describe('DatabaseDeserializer', () => {
       const appRef = new AppReference('default');
       const databaseRef = new DatabaseReference('default', appRef);
       const serializedDatabaseRef = DatabaseSerializer.serializeDatabaseReference(databaseRef);
-      const deserializedDatabaseRef = new DatabaseDeserializer().deserializeDatabaseReference(serializedDatabaseRef);
+      const deserializedDatabaseRef = DatabaseDeserializer.deserializeDatabaseReference(serializedDatabaseRef);
       expect(deserializedDatabaseRef).toEqual(databaseRef);
     });
   });
@@ -22,11 +22,11 @@ describe('DatabaseDeserializer', () => {
       
       const databaseRef = new DatabaseReference('default', appRef);
       const serializedDatabaseRef = DatabaseSerializer.serializeDatabaseReference(databaseRef);
-      const deserializedDatabaseRef = new DatabaseDeserializer().deserializeDatabaseReference(serializedDatabaseRef);
+      const deserializedDatabaseRef = DatabaseDeserializer.deserializeDatabaseReference(serializedDatabaseRef);
       
       const collectionRef = new CollectionReference('users', databaseRef);
       const serializedCollectionRef = DatabaseSerializer.serializeCollectionReference(collectionRef);
-      const deserializedCollectionRef = new DatabaseDeserializer().deserializeCollectionReference(serializedCollectionRef);
+      const deserializedCollectionRef = DatabaseDeserializer.deserializeCollectionReference(serializedCollectionRef);
       
       expect(deserializedCollectionRef).toEqual(collectionRef);
       expect(deserializedDatabaseRef).toEqual(databaseRef);
@@ -41,11 +41,11 @@ describe('DatabaseDeserializer', () => {
 
       const collectionRef = new CollectionReference('users', databaseRef);
       const serializedCollectionRef = DatabaseSerializer.serializeCollectionReference(collectionRef);
-      const deserializedCollectionRef = new DatabaseDeserializer().deserializeCollectionReference(serializedCollectionRef);
+      const deserializedCollectionRef = DatabaseDeserializer.deserializeCollectionReference(serializedCollectionRef);
 
       const documentRef = new DocumentReference('10', collectionRef);
       const serializedDocumentRef = DatabaseSerializer.serializeDocumentReference(documentRef);
-      const deserializedDocumentRef = new DatabaseDeserializer().deserializeDocumentReference(serializedDocumentRef);
+      const deserializedDocumentRef = DatabaseDeserializer.deserializeDocumentReference(serializedDocumentRef);
       
       expect(deserializedCollectionRef).toEqual(collectionRef);
       expect(deserializedDocumentRef).toEqual(documentRef);
