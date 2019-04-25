@@ -13,3 +13,7 @@ module.exports = {
   CollectionReference: require('./CollectionReference'),
   DatabaseReference: require('./DatabaseReference')
 };
+
+require('./DatabaseReferenceExtensions');
+require('./CollectionReferenceExtensions');
+require('./DocumentReferenceExtensions');

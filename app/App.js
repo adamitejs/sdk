@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const AppReference = require('./AppReference');
-const ServiceReference = require('./ServiceReference');
 
 class App {
   constructor(ref) {

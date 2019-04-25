@@ -1,11 +1,9 @@
 const io = require('socket.io-client');
-const { ServiceReference } = require('../app');
 const DatabaseReference = require('./DatabaseReference');
 
 class DatabaseService {
   constructor(app) {
     this.app = app;
-    this.ref = new ServiceReference('database', this.app.ref);
     this.client = io(`${this.app.config.databaseUrl}?key=${this.app.config.apiKey}`);
 
     this.client.on('connect', () => {
@@ -24,7 +22,7 @@ class DatabaseService {
   }
   
   database(name = 'default') {
-    return new DatabaseReference(name, this.ref);
+    return new DatabaseReference(name, this.app.ref);
   }
 }
 
