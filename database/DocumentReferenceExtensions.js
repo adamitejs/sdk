@@ -51,3 +51,23 @@ DocumentReference.prototype.delete = async function() {
     });
   });
 };
+
+DocumentReference.prototype.onSnapshot = async function(callback) {
+  const app = App.getApp(this.collection.database.app.name);
+  const { database: { client } } = app.services;
+  
+  client.emit('command', {
+    name: 'database.subscribeDocument',
+    args: { ref: DatabaseSerializer.serializeDocumentReference(this) }
+  }, (response) => {
+    if (response.error) return reject(response.error);
+    const { subscription: { id } } = response;
+    
+    client.on(id, (update) => {
+      if (update.error) return reject(response.error);
+      const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
+      const oldSnapshot = update.oldSnapshot && new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
+      callback(newSnapshot, oldSnapshot);
+    });
+  });
+};

@@ -6,6 +6,10 @@ class DocumentSnapshot {
     this.data = data;
     if (this.data) delete this.data.id;
   }
+
+  get id() {
+    return this.ref.id;
+  }
 }
 
 module.exports = DocumentSnapshot;
