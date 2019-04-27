@@ -53,8 +53,8 @@ CollectionReference.prototype.onSnapshot = async function(callback) {
       this._snapshot = this._snapshot || new CollectionSnapshot(ref);
       const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
       const oldSnapshot = update.oldSnapshot && new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
-      this._snapshot.handleSubscriptionUpdate(newSnapshot, oldSnapshot);
-      callback(this._snapshot, { newSnapshot, oldSnapshot });
+      this._snapshot.handleSubscriptionUpdate(update.changeType, newSnapshot, oldSnapshot);
+      callback(this._snapshot, { newSnapshot, oldSnapshot, changeType: update.changeType });
     });
   });
 };

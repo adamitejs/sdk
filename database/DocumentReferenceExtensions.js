@@ -67,7 +67,7 @@ DocumentReference.prototype.onSnapshot = async function(callback) {
       if (update.error) return reject(response.error);
       const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
       const oldSnapshot = update.oldSnapshot && new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
-      callback(newSnapshot, oldSnapshot);
+      callback(newSnapshot, { newSnapshot, oldSnapshot, changeType: update.changeType });
     });
   });
 };

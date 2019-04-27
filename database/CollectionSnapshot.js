@@ -11,12 +11,12 @@ class CollectionSnapshot {
     return this.ref.id;
   }
 
-  handleSubscriptionUpdate(newSnapshot, oldSnapshot) {
-    if (newSnapshot && !oldSnapshot) {
+  handleSubscriptionUpdate(changeType, newSnapshot, oldSnapshot) {
+    if (changeType === 'create') {
       this._handleCreate(newSnapshot);
-    } else if (!newSnapshot && oldSnapshot) {
+    } else if (changeType === 'delete') {
       this._handleDelete(oldSnapshot);
-    } else {
+    } else if (changeType === 'update') {
       this._handleUpdate(newSnapshot, oldSnapshot);
     }
   }  
@@ -30,10 +30,6 @@ class CollectionSnapshot {
   }
 
   _handleUpdate(newSnapshot, oldSnapshot) {
-    if (this.docs.findIndex(snapshot => snapshot.ref.id === oldSnapshot.ref.id) === -1) {
-      return this._handleCreate(newSnapshot);
-    }
-
     this.docs = this.docs.map(snapshot => snapshot.ref.id === oldSnapshot.ref.id ? newSnapshot : snapshot);
   }
 }
