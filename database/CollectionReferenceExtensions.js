@@ -21,6 +21,22 @@ CollectionReference.prototype.create = async function(data) {
   });
 };
 
+CollectionReference.prototype.get = async function(data) {
+  return new Promise((resolve, reject) => {
+    const app = App.getApp(this.database.app.name);
+    const { database: { client } } = app.services;
+    
+    client.emit('command', {
+      name: 'database.readCollection',
+      args: { ref: DatabaseSerializer.serializeCollectionReference(this), data }
+    }, (response) => {
+      if (response.error) return reject(response.error);
+      const { snapshot: { ref, data } } = response;
+      resolve(new CollectionSnapshot(ref, data));
+    });
+  });
+};
+
 CollectionReference.prototype.onSnapshot = async function(callback) {
   const app = App.getApp(this.database.app.name);
   const { database: { client } } = app.services;

@@ -13,6 +13,9 @@ class DatabaseSerializer {
     return {
       type: 'CollectionReference',
       name: collectionRef.name,
+      limit: collectionRef._limit,
+      orderBy: collectionRef._orderBy,
+      wheres: collectionRef._wheres,
       database: DatabaseSerializer.serializeDatabaseReference(collectionRef.database)
     };
   }

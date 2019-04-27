@@ -1,9 +1,10 @@
 const DatabaseDeserializer = require('../core/serialization/DatabaseDeserializer');
+const DocumentSnapshot = require('./DocumentSnapshot');
 
 class CollectionSnapshot {
   constructor(ref, docs = []) {
     this.ref = DatabaseDeserializer.deserializeCollectionReference(ref);
-    this.docs = docs;
+    this.docs = docs.map(doc => new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(doc.ref), doc.data));
   }
 
   get id() {
