@@ -29,6 +29,10 @@ class CollectionSnapshot {
   }
 
   _handleUpdate(newSnapshot, oldSnapshot) {
+    if (this.docs.findIndex(snapshot => snapshot.ref.id === oldSnapshot.ref.id) === -1) {
+      return this._handleCreate(newSnapshot);
+    }
+
     this.docs = this.docs.map(snapshot => snapshot.ref.id === oldSnapshot.ref.id ? newSnapshot : snapshot);
   }
 }
