@@ -22,15 +22,29 @@ class CollectionSnapshot {
   }  
 
   _handleCreate(newSnapshot) {
-    this.docs = [...this.docs, newSnapshot];
+    this.docs.push(newSnapshot);
   }
 
   _handleDelete(newSnapshot) {
-    this.docs = this.docs.filter(snapshot => snapshot.ref.id !== newSnapshot.ref.id);
+    const docs = this.docs;
+    for(var i = docs.length - 1; i >= 0; i--) {
+      if (docs[i].ref.id === newSnapshot.ref.id) {
+        docs.splice(i, 1);
+        return;
+      }
+    }
+    console.error("[CollectionSnapshot]: Attempted to delete snapshot of document which is not present in collection snapshot.");
   }
 
   _handleUpdate(newSnapshot, oldSnapshot) {
-    this.docs = this.docs.map(snapshot => snapshot.ref.id === oldSnapshot.ref.id ? newSnapshot : snapshot);
+    const docs = this.docs;
+    for(var i = docs.length - 1; i >= 0; i--) {
+      if (docs[i].ref.id === oldSnapshot.ref.id) {
+        docs[i] = newSnapshot;
+        return;
+      }
+    }
+    console.error("[CollectionSnapshot]: Attempted to update snapshot of document which is not present in collection snapshot.");
   }
 }
 
