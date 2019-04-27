@@ -9,7 +9,11 @@ class DatabaseDeserializer {
   }
 
   static deserializeCollectionReference(collectionRef) {
-    return new CollectionReference(collectionRef.name, DatabaseDeserializer.deserializeDatabaseReference(collectionRef.database));
+    const ref = new CollectionReference(collectionRef.name, DatabaseDeserializer.deserializeDatabaseReference(collectionRef.database));
+    ref._limit = collectionRef.limit || ref._limit;
+    ref._orderBy = collectionRef.orderBy || ref._orderBy;
+    ref._wheres = collectionRef.wheres || ref._wheres;
+    return ref;
   }
 
   static deserializeDocumentReference(documentRef) {
