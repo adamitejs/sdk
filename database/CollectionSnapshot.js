@@ -11,7 +11,7 @@ class CollectionSnapshot {
     return this.ref.id;
   }
 
-  handleSubscriptionUpdate(changeType, newSnapshot, oldSnapshot) {
+  mutate(changeType, oldSnapshot, newSnapshot) {
     if (changeType === 'create') {
       this._handleCreate(newSnapshot);
     } else if (changeType === 'delete') {
@@ -19,32 +19,38 @@ class CollectionSnapshot {
     } else if (changeType === 'update') {
       this._handleUpdate(newSnapshot, oldSnapshot);
     }
+
+    const mutatedSnapshot = new CollectionSnapshot(this.ref);
+    mutatedSnapshot.docs = this.docs;
+    return mutatedSnapshot;
   }  
 
   _handleCreate(newSnapshot) {
-    this.docs.push(newSnapshot);
+    this.docs = [
+      ...this.docs,
+      newSnapshot
+    ];
   }
 
   _handleDelete(newSnapshot) {
-    const docs = this.docs;
-    for(var i = docs.length - 1; i >= 0; i--) {
-      if (docs[i].ref.id === newSnapshot.ref.id) {
-        docs.splice(i, 1);
-        return;
-      }
-    }
-    console.error("[CollectionSnapshot]: Attempted to delete snapshot of document which is not present in collection snapshot.");
+    const index = this.docs.findIndex(snapshot => snapshot.ref.id === newSnapshot.ref.id);
+    if (index === -1) return;
+
+    this.docs = [
+      ...this.docs.slice(0, index),
+      ...this.docs.slice(index + 1)
+    ];
   }
 
   _handleUpdate(newSnapshot, oldSnapshot) {
-    const docs = this.docs;
-    for(var i = docs.length - 1; i >= 0; i--) {
-      if (docs[i].ref.id === oldSnapshot.ref.id) {
-        docs[i] = newSnapshot;
-        return;
-      }
-    }
-    console.error("[CollectionSnapshot]: Attempted to update snapshot of document which is not present in collection snapshot.");
+    const index = this.docs.findIndex(snapshot => snapshot.ref.id === oldSnapshot.ref.id);
+    if (index === -1) return;
+
+    this.docs = [
+      ...this.docs.slice(0, index),
+      newSnapshot,
+      ...this.docs.slice(index + 1)
+    ];
   }
 }
 

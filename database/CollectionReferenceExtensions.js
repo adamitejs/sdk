@@ -50,10 +50,16 @@ CollectionReference.prototype.onSnapshot = async function(callback) {
     
     client.on(id, (update) => {
       if (update.error) return reject(response.error);
+      
+      // create the in-memory snapshot if needed
       this._snapshot = this._snapshot || new CollectionSnapshot(ref);
-      const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
+      
+      // deserialize the document snapshots
       const oldSnapshot = update.oldSnapshot && new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
-      this._snapshot.handleSubscriptionUpdate(update.changeType, newSnapshot, oldSnapshot);
+      const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
+      
+      // mutate the in-memory snapshot, and send it in the callback
+      this._snapshot = this._snapshot.mutate(update.changeType, oldSnapshot, newSnapshot);
       callback(this._snapshot, { newSnapshot, oldSnapshot, changeType: update.changeType });
     });
   });
