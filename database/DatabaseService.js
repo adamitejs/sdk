@@ -1,10 +1,11 @@
+const querystring = require('querystring');
 const io = require('socket.io-client');
 const DatabaseReference = require('./DatabaseReference');
 
 class DatabaseService {
   constructor(app) {
     this.app = app;
-    this.client = io(`${this.app.config.databaseUrl}?key=${this.app.config.apiKey}`);
+    this.client = io(this.url);
 
     this.client.on('connect', () => {
       this.app.log('database', 'connected');
@@ -19,6 +20,15 @@ class DatabaseService {
       this.app.log('database', 'error');
       console.log(r);
     });
+  }
+
+  get url() {
+    const qs = querystring.encode({
+      key: this.app.config.apiKey,
+      ...(this.app.config.queryString || {}) 
+    });
+    
+    return `${this.app.config.databaseUrl}?${qs}`;
   }
   
   database(name = 'default') {
