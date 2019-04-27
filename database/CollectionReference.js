@@ -4,9 +4,7 @@ class CollectionReference {
   constructor(name, database) {
     this.name = name;
     this.database = database;
-    this._limit = 10000;
-    this._orderBy = [];
-    this._wheres = [];
+    this.query = { limit: 1000, orderBy: [], where: [] };
   }
 
   doc(id) {
@@ -14,17 +12,17 @@ class CollectionReference {
   }
 
   limit(limit) {
-    this._limit = limit;
+    this.query.limit = limit;
     return this;
   }
 
   orderBy(field, direction = 'asc') {
-    this._orderBy = [field, direction];
+    this.query.orderBy.push([field, direction]);
     return this;
   }
 
   where(field, operator, value) {
-    this._wheres.push([field, operator, value]);
+    this.query.where.push([field, operator, value]);
     return this;
   }
 }

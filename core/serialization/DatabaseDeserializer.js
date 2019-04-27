@@ -10,9 +10,7 @@ class DatabaseDeserializer {
 
   static deserializeCollectionReference(collectionRef) {
     const ref = new CollectionReference(collectionRef.name, DatabaseDeserializer.deserializeDatabaseReference(collectionRef.database));
-    ref._limit = collectionRef.limit || ref._limit;
-    ref._orderBy = collectionRef.orderBy || ref._orderBy;
-    ref._wheres = collectionRef.wheres || ref._wheres;
+    ref.query = collectionRef.query;
     return ref;
   }
 
