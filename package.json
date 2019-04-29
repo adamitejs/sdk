@@ -1,6 +1,6 @@
 {
-  "name": "@arc/sdk",
-  "description": "Arc client SDK.",
+  "name": "@adamite/sdk",
+  "description": "Adamite client SDK.",
   "version": "0.1.0",
   "main": "index.js",
   "license": "MIT",
