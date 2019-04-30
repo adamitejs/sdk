@@ -7,7 +7,7 @@ const DocumentSnapshot = require('./DocumentSnapshot');
 DocumentReference.prototype.get = async function() {
   return new Promise((resolve, reject) => {
     const app = App.getApp(this.collection.database.app.name);
-    const { database: { client } } = app.services;
+    const { database: { client } } = app.plugins;
     
     client.emit('command', {
       name: 'database.readDocument',
@@ -23,7 +23,7 @@ DocumentReference.prototype.get = async function() {
 DocumentReference.prototype.update = async function(data) {
   return new Promise((resolve, reject) => {
     const app = App.getApp(this.collection.database.app.name);
-    const { database: { client } } = app.services;
+    const { database: { client } } = app.plugins;
     
     client.emit('command', {
       name: 'database.updateDocument',
@@ -39,7 +39,7 @@ DocumentReference.prototype.update = async function(data) {
 DocumentReference.prototype.delete = async function() {
   return new Promise((resolve, reject) => {
     const app = App.getApp(this.collection.database.app.name);
-    const { database: { client } } = app.services;
+    const { database: { client } } = app.plugins;
     
     client.emit('command', {
       name: 'database.deleteDocument',
@@ -54,7 +54,7 @@ DocumentReference.prototype.delete = async function() {
 
 DocumentReference.prototype.onSnapshot = async function(callback) {
   const app = App.getApp(this.collection.database.app.name);
-  const { database: { client } } = app.services;
+  const { database: { client } } = app.plugins;
   
   client.emit('command', {
     name: 'database.subscribeDocument',

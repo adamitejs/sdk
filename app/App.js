@@ -4,7 +4,7 @@ const AppReference = require('./AppReference');
 class App {
   constructor(ref) {
     this.ref = ref;
-    this.services = {};
+    this.plugins = {};
   }
 
   initializeApp(config) {
@@ -13,55 +13,55 @@ class App {
     };
 
     this.config = _.merge(DEFAULT_CONFIG, config);
-    this.initializeServices();
+    this.initializePlugins();
   }
 
-  initializeServices() {
-    for (const serviceName in App.getServices()) {
-      const initializeService = App.getService(serviceName);
-      this.services[serviceName] = initializeService(this);
+  initializePlugins() {
+    for (const pluginName in App.getPlugins()) {
+      const initializePlugin = App.getPlugin(pluginName);
+      this.plugins[pluginName] = initializePlugin(this);
     }
   }
 
-  service(name) {
-    return this.services[name];
+  plugin(name) {
+    return this.plugins[name];
   }
 
-  error(service, message) {
+  error(plugin, message) {
     if (this.config.logLevel < 2) return;
-    console.error(`⚡ [${service}]\t${message}`);
+    console.error(`⚡ [${plugin}]\t${message}`);
   }
   
-  warn(service, message) {
+  warn(plugin, message) {
     if (this.config.logLevel < 1) return;
-    console.warn(`⚡ [${service}]\t${message}`);
+    console.warn(`⚡ [${plugin}]\t${message}`);
   }
 
-  log(service, message) {
+  log(plugin, message) {
     if (this.config.logLevel < 0) return;
-    console.log(`⚡ [${service}]\t${message}`);
+    console.log(`⚡ [${plugin}]\t${message}`);
   }
 
   static setGlobals() {
     global.__ARC__ = global.__ARC__ || {
       apps: {},
-      services: {}
+      plugins: {}
     };
   }
 
-  static addService(name, initializer) {
+  static addPlugin(name, initializer) {
     App.setGlobals();
-    global.__ARC__.services[name] = initializer;
+    global.__ARC__.plugins[name] = initializer;
   }
 
-  static getService(name) {
+  static getPlugin(name) {
     App.setGlobals();
-    return global.__ARC__.services[name];
+    return global.__ARC__.plugins[name];
   }
 
-  static getServices() {
+  static getPlugins() {
     App.setGlobals();
-    return global.__ARC__.services;
+    return global.__ARC__.plugins;
   }
 
   static getApps() {

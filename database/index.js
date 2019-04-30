@@ -1,14 +1,16 @@
 const { App } = require('../app');
-const DatabaseService = require('./DatabaseService');
-
-App.addService('database', function(app) {
-  const service = new DatabaseService(app);
-  app.database = service.database.bind(service);
-  return service;
-});
+const DatabasePlugin = require('./DatabasePlugin');
 
 module.exports = {
-  DatabaseService,
+  registerDatabasePlugin: () => {
+    App.addPlugin('database', function(app) {
+      const plugin = new DatabasePlugin(app);
+      app.database = plugin.database.bind(plugin);
+      return plugin;
+    });
+  },
+  
+  DatabasePlugin,
   DocumentReference: require('./DocumentReference'),
   CollectionReference: require('./CollectionReference'),
   DatabaseReference: require('./DatabaseReference')

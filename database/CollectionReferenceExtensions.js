@@ -8,7 +8,7 @@ const CollectionSnapshot = require('./CollectionSnapshot');
 CollectionReference.prototype.create = async function(data) {
   return new Promise((resolve, reject) => {
     const app = App.getApp(this.database.app.name);
-    const { database: { client } } = app.services;
+    const { database: { client } } = app.plugins;
     
     client.emit('command', {
       name: 'database.createDocument',
@@ -24,7 +24,7 @@ CollectionReference.prototype.create = async function(data) {
 CollectionReference.prototype.get = async function(data) {
   return new Promise((resolve, reject) => {
     const app = App.getApp(this.database.app.name);
-    const { database: { client } } = app.services;
+    const { database: { client } } = app.plugins;
     
     client.emit('command', {
       name: 'database.readCollection',
@@ -39,7 +39,7 @@ CollectionReference.prototype.get = async function(data) {
 
 CollectionReference.prototype.onSnapshot = async function(callback) {
   const app = App.getApp(this.database.app.name);
-  const { database: { client } } = app.services;
+  const { database: { client } } = app.plugins;
   
   client.emit('command', {
     name: 'database.subscribeCollection',
