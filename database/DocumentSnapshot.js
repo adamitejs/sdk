@@ -4,8 +4,7 @@ class DocumentSnapshot {
   constructor(ref, data) {
     this.ref = DatabaseDeserializer.deserializeDocumentReference(ref);
     this.data = data;
-    if (this.data)
-      delete this.data.id;
+    if (this.data) delete this.data.id;
   }
 
   get id() {

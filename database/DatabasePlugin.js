@@ -2,9 +2,11 @@ const querystring = require('querystring');
 const io = require('socket.io-client');
 const DatabaseReference = require('./DatabaseReference');
 
-class DatabasePlugin {
+class DatabasePlugin {  
   constructor(app) {
     this.app = app;
+    this.app.database = this.database.bind(this);
+
     this.client = io(this.url);
 
     this.client.on('connect', () => {
@@ -36,4 +38,5 @@ class DatabasePlugin {
   }
 }
 
+DatabasePlugin.PLUGIN_NAME = 'database';
 module.exports = DatabasePlugin;
