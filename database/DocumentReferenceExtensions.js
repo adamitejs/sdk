@@ -53,12 +53,18 @@ DocumentReference.prototype.delete = async function() {
 };
 
 DocumentReference.prototype.onSnapshot = async function(callback) {
+  this.stream(({ changeType, newSnapshot, oldSnapshot }) => {
+    callback(newSnapshot, { newSnapshot, oldSnapshot, changeType });
+  }, { initialValues: true });
+};
+
+DocumentReference.prototype.stream = async function(callback, options = { initialValues: false }) {
   const app = App.getApp(this.collection.database.app.name);
   const { database: { client } } = app.plugins;
   
   client.emit('command', {
     name: 'database.subscribeDocument',
-    args: { ref: DatabaseSerializer.serializeDocumentReference(this) }
+    args: { ref: DatabaseSerializer.serializeDocumentReference(this), initialValues: options.initialValues }
   }, (response) => {
     if (response.error) return reject(response.error);
     const { subscription: { id } } = response;
@@ -67,7 +73,7 @@ DocumentReference.prototype.onSnapshot = async function(callback) {
       if (update.error) return reject(response.error);
       const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
       const oldSnapshot = update.oldSnapshot && new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
-      callback(newSnapshot, { newSnapshot, oldSnapshot, changeType: update.changeType });
+      callback({ newSnapshot, oldSnapshot, changeType: update.changeType });
     });
   });
 };
