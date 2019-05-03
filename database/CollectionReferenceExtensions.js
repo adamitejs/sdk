@@ -38,29 +38,35 @@ CollectionReference.prototype.get = async function(data) {
 };
 
 CollectionReference.prototype.onSnapshot = async function(callback) {
+  // create the in-memory snapshot if needed
+  this._snapshot = this._snapshot || new CollectionSnapshot(this);
+
+  this.stream(({ changeType, oldSnapshot, newSnapshot }) => {
+    // mutate the in-memory snapshot, and send it in the callback
+    this._snapshot = this._snapshot.mutate(changeType, oldSnapshot, newSnapshot);
+    callback(this._snapshot, { newSnapshot, oldSnapshot, changeType });
+  }, { initialValues: true });
+};
+
+CollectionReference.prototype.stream = async function(callback, options = { initialValues: false }) {
   const app = App.getApp(this.database.app.name);
   const { database: { client } } = app.plugins;
   
   client.emit('command', {
     name: 'database.subscribeCollection',
-    args: { ref: DatabaseSerializer.serializeCollectionReference(this) }
+    args: { ref: DatabaseSerializer.serializeCollectionReference(this), initialValues: options.initialValues }
   }, (response) => {
     if (response.error) return reject(response.error);
-    const { subscription: { id, ref } } = response;
+    const { subscription: { id } } = response;
     
     client.on(id, (update) => {
       if (update.error) return reject(response.error);
-      
-      // create the in-memory snapshot if needed
-      this._snapshot = this._snapshot || new CollectionSnapshot(ref);
       
       // deserialize the document snapshots
       const oldSnapshot = update.oldSnapshot && new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
       const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
       
-      // mutate the in-memory snapshot, and send it in the callback
-      this._snapshot = this._snapshot.mutate(update.changeType, oldSnapshot, newSnapshot);
-      callback(this._snapshot, { newSnapshot, oldSnapshot, changeType: update.changeType });
+      callback({ changeType: update.changeType, newSnapshot, oldSnapshot });
     });
   });
 };
