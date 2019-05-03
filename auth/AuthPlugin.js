@@ -1,8 +1,12 @@
+const { EventEmitter } = require('events');
 const querystring = require('querystring');
 const io = require('socket.io-client');
+const jwt = require('jsonwebtoken');
 
-class AuthPlugin {  
+class AuthPlugin extends EventEmitter {  
   constructor(app) {
+    super();
+
     this.app = app;
     this.client = io(this.url);
     this.app.auth = () => this;
@@ -20,6 +24,17 @@ class AuthPlugin {
       this.app.log('auth', 'error');
       console.log(r);
     });
+
+    this._loadAuthState();
+  }
+
+  get currentUser() {
+    if (this.currentToken) {
+      const decodedToken = jwt.decode(this.currentToken);
+      return { id: decodedToken.sub, email: decodedToken.email, jwt: decodedToken, token: this.currentToken };
+    } else {
+      return null;
+    }
   }
 
   get url() {
@@ -42,7 +57,8 @@ class AuthPlugin {
           return;
         }
 
-        resolve();
+        this._saveAuthState(token);
+        resolve(this.currentUser);
       });
     });
   }
@@ -58,7 +74,8 @@ class AuthPlugin {
           return;
         }
 
-        resolve(token);
+        this._saveAuthState(token);
+        resolve(this.currentUser);
       });
     });
   }
@@ -77,6 +94,33 @@ class AuthPlugin {
         resolve(data);
       });
     });
+  }
+
+  logout() {
+    this._clearAuthState();
+  }
+
+  onAuthStateChange(callback) {
+    callback(this.currentUser);
+    this.on('authStateChange', callback);
+    return () => this.off('authStateChange', callback);
+  }
+
+  _loadAuthState() {
+    if (!window.localStorage) return;
+    this.currentToken = window.localStorage.getItem(`adamite:auth:${this.app.ref.name}.token`);
+  }
+
+  _saveAuthState(token) {
+    this.currentToken = token;
+    if (!window.localStorage) return;
+    window.localStorage.setItem(`adamite:auth:${this.app.ref.name}.token`, token);
+  }
+
+  _clearAuthState() {
+    this.currentToken = null;
+    if (!window.localStorage) return;
+    window.localStorage.removeItem(`adamite:auth:${this.app.ref.name}.token`);
   }
 }
 
