@@ -1,1 +1,1 @@
-const DatabaseReference = require('./DatabaseReference');
+const DatabaseReference = require("./DatabaseReference");

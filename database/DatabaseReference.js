@@ -1,4 +1,4 @@
-const CollectionReference = require('./CollectionReference');
+const CollectionReference = require("./CollectionReference");
 
 class DatabaseReference {
   constructor(name, app) {

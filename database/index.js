@@ -1,12 +1,12 @@
-const DatabasePlugin = require('./DatabasePlugin');
+const DatabasePlugin = require("./DatabasePlugin");
 
 module.exports = {
   DatabasePlugin,
-  DocumentReference: require('./DocumentReference'),
-  CollectionReference: require('./CollectionReference'),
-  DatabaseReference: require('./DatabaseReference')
+  DocumentReference: require("./DocumentReference"),
+  CollectionReference: require("./CollectionReference"),
+  DatabaseReference: require("./DatabaseReference")
 };
 
-require('./DatabaseReferenceExtensions');
-require('./CollectionReferenceExtensions');
-require('./DocumentReferenceExtensions');
+require("./DatabaseReferenceExtensions");
+require("./CollectionReferenceExtensions");
+require("./DocumentReferenceExtensions");

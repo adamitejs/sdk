@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const AppReference = require('./AppReference');
+const _ = require("lodash");
+const AppReference = require("./AppReference");
 
 class App {
   constructor(ref) {
@@ -31,7 +31,7 @@ class App {
     if (this.config.logLevel < 2) return;
     console.error(`⚡ [${plugin}]\t${message}`);
   }
-  
+
   warn(plugin, message) {
     if (this.config.logLevel < 1) return;
     console.warn(`⚡ [${plugin}]\t${message}`);

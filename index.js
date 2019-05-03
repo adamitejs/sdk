@@ -1,6 +1,6 @@
-const { App } = require('./app');
+const { App } = require("./app");
 
-const app = function(name = 'default') {
+const app = function(name = "default") {
   return App.getApp(name);
 };
 

@@ -1,7 +1,7 @@
 class AppSerializer {
   static serializeAppReference(appRef) {
     return {
-      type: 'AppReference',
+      type: "AppReference",
       name: appRef.name
     };
   }

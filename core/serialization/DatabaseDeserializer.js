@@ -1,7 +1,7 @@
-const AppDeserializer = require('../serialization/AppDeserializer');
-const DatabaseReference = require('../../database/DatabaseReference');
-const CollectionReference = require('../../database/CollectionReference');
-const DocumentReference = require('../../database/DocumentReference');
+const AppDeserializer = require("../serialization/AppDeserializer");
+const DatabaseReference = require("../../database/DatabaseReference");
+const CollectionReference = require("../../database/CollectionReference");
+const DocumentReference = require("../../database/DocumentReference");
 
 class DatabaseDeserializer {
   static deserializeDatabaseReference(databaseRef) {
@@ -9,16 +9,20 @@ class DatabaseDeserializer {
   }
 
   static deserializeCollectionReference(collectionRef) {
-    const ref = new CollectionReference(collectionRef.name, DatabaseDeserializer.deserializeDatabaseReference(collectionRef.database));
+    const ref = new CollectionReference(
+      collectionRef.name,
+      DatabaseDeserializer.deserializeDatabaseReference(collectionRef.database)
+    );
     ref.query = collectionRef.query;
     return ref;
   }
 
   static deserializeDocumentReference(documentRef) {
-    return new DocumentReference(documentRef.id, DatabaseDeserializer.deserializeCollectionReference(documentRef.collection));
+    return new DocumentReference(
+      documentRef.id,
+      DatabaseDeserializer.deserializeCollectionReference(documentRef.collection)
+    );
   }
 }
 
 module.exports = DatabaseDeserializer;
-
-

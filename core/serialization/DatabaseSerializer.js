@@ -1,9 +1,9 @@
-const AppSerializer = require('./AppSerializer');
+const AppSerializer = require("./AppSerializer");
 
 class DatabaseSerializer {
   static serializeDatabaseReference(databaseRef) {
     return {
-      type: 'DatabaseReference',
+      type: "DatabaseReference",
       name: databaseRef.name,
       app: AppSerializer.serializeAppReference(databaseRef.app)
     };
@@ -11,7 +11,7 @@ class DatabaseSerializer {
 
   static serializeCollectionReference(collectionRef) {
     return {
-      type: 'CollectionReference',
+      type: "CollectionReference",
       name: collectionRef.name,
       query: collectionRef.query,
       database: DatabaseSerializer.serializeDatabaseReference(collectionRef.database)
@@ -20,7 +20,7 @@ class DatabaseSerializer {
 
   static serializeDocumentReference(documentRef) {
     return {
-      type: 'DocumentReference',
+      type: "DocumentReference",
       id: documentRef.id,
       collection: DatabaseSerializer.serializeCollectionReference(documentRef.collection)
     };

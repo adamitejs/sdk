@@ -1,4 +1,4 @@
-const DatabaseDeserializer = require('../core/serialization/DatabaseDeserializer');
+const DatabaseDeserializer = require("../core/serialization/DatabaseDeserializer");
 
 class DocumentSnapshot {
   constructor(ref, data) {

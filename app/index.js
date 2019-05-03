@@ -1,4 +1,4 @@
 module.exports = {
-  App: require('./App'),
-  AppReference: require('./AppReference')
+  App: require("./App"),
+  AppReference: require("./AppReference")
 };

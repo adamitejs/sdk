@@ -1,4 +1,4 @@
-const DocumentReference = require('./DocumentReference');
+const DocumentReference = require("./DocumentReference");
 
 class CollectionReference {
   constructor(name, database) {
@@ -16,7 +16,7 @@ class CollectionReference {
     return this;
   }
 
-  orderBy(field, direction = 'asc') {
+  orderBy(field, direction = "asc") {
     this.query.orderBy.push([field, direction]);
     return this;
   }

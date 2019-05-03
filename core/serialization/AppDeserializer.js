@@ -1,4 +1,4 @@
-const AppReference = require('../../app/AppReference');
+const AppReference = require("../../app/AppReference");
 
 class AppDeserializer {
   static deserializeAppReference(appReference) {
