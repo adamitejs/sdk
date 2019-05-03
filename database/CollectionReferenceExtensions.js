@@ -49,24 +49,5 @@ CollectionReference.prototype.onSnapshot = async function(callback) {
 };
 
 CollectionReference.prototype.stream = async function(callback, options = { initialValues: false }) {
-  const app = App.getApp(this.database.app.name);
-  const { database: { client } } = app.plugins;
-  
-  client.emit('command', {
-    name: 'database.subscribeCollection',
-    args: { ref: DatabaseSerializer.serializeCollectionReference(this), initialValues: options.initialValues }
-  }, (response) => {
-    if (response.error) return reject(response.error);
-    const { subscription: { id } } = response;
-    
-    client.on(id, (update) => {
-      if (update.error) return reject(response.error);
-      
-      // deserialize the document snapshots
-      const oldSnapshot = update.oldSnapshot && new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
-      const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
-      
-      callback({ changeType: update.changeType, newSnapshot, oldSnapshot });
-    });
-  });
+  App.getApp(this.database.app.name).plugins.database.collectionStream(this).register(callback, options.initialValues);
 };
