@@ -27,6 +27,12 @@
     }
   },
   "jest": {
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "auth/**/*.js",
+      "core/**/*.js",
+      "database/**/*.js"
+    ],
     "coverageDirectory": "./coverage/",
     "collectCoverage": true
   }
