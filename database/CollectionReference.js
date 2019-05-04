@@ -7,6 +7,12 @@ class CollectionReference {
     this.query = { limit: 1000, orderBy: [], where: [] };
   }
 
+  get hash() {
+    return new Buffer(
+      `${this.database.app.name}/${this.database.name}/${this.name}`
+    ).toString("base64");
+  }
+
   doc(id) {
     return new DocumentReference(id, this);
   }
