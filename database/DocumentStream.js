@@ -16,59 +16,11 @@ class DocumentStream {
    * @param {DocumentReference} documentReference
    */
   constructor(databasePlugin, documentReference) {
+    this.databasePlugin = databasePlugin;
     this.documentReference = documentReference;
     this.lastSnapshot = null;
     this.handlers = [];
-
-    const client = databasePlugin.client;
-
-    client.emit(
-      "command",
-      {
-        name: "database.subscribeDocument",
-        args: {
-          ref: DatabaseSerializer.serializeDocumentReference(documentReference),
-          initialValues: true
-        }
-      },
-      response => {
-        if (response.error) {
-          return reject(response.error);
-        } else {
-          const {
-            subscription: { id }
-          } = response;
-
-          client.on(id, update => {
-            if (update.error) {
-              return reject(response.error);
-            } else {
-              const newSnapshot =
-                update.newSnapshot &&
-                new DocumentSnapshot(
-                  update.newSnapshot.ref,
-                  update.newSnapshot.data
-                );
-              const oldSnapshot =
-                update.oldSnapshot &&
-                new DocumentSnapshot(
-                  update.oldSnapshot.ref,
-                  update.oldSnapshot.data
-                );
-              const result = {
-                newSnapshot,
-                oldSnapshot,
-                changeType: update.changeType
-              };
-              this.lastSnapshot = newSnapshot;
-              for (var i = this.handlers.length - 1; i >= 0; i--) {
-                this.handlers[i](result);
-              }
-            }
-          });
-        }
-      }
-    );
+    this._subscribe();
   }
 
   /**
@@ -89,6 +41,41 @@ class DocumentStream {
     }
 
     this.handlers.push(handler);
+  }
+
+  async _subscribe() {
+    const client = this.databasePlugin.client;
+
+    const { subscription } = await client.invoke("subscribeDocument", {
+      ref: DatabaseSerializer.serializeDocumentReference(
+        this.documentReference
+      ),
+      initialValues: true
+    });
+
+    client.socket.on(subscription.id, this._handleUpdate.bind(this));
+  }
+
+  _handleUpdate(update) {
+    if (update.error) {
+      return reject(response.error);
+    } else {
+      const newSnapshot =
+        update.newSnapshot &&
+        new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
+      const oldSnapshot =
+        update.oldSnapshot &&
+        new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
+      const result = {
+        newSnapshot,
+        oldSnapshot,
+        changeType: update.changeType
+      };
+      this.lastSnapshot = newSnapshot;
+      for (var i = this.handlers.length - 1; i >= 0; i--) {
+        this.handlers[i](result);
+      }
+    }
   }
 }
 

@@ -1,5 +1,5 @@
 const querystring = require("querystring");
-const io = require("socket.io-client");
+const relay = require("@adamite/relay");
 const DatabaseReference = require("./DatabaseReference");
 const DocumentStream = require("./DocumentStream");
 const CollectionStream = require("./CollectionStream");
@@ -13,21 +13,9 @@ class DatabasePlugin {
     this.documentStreamCache = {};
     this.collectionStreamCache = {};
 
-    // Initialisation of Socket Connection.
-    this.client = io(this.url);
-
-    this.client.on("connect", () => {
-      this.app.log("database", "connected");
-    });
-
-    this.client.on("disconnect", r => {
-      this.app.log("database", "disconnected");
-      console.log(r);
-    });
-
-    this.client.on("error", r => {
-      this.app.log("database", "error");
-      console.log(r);
+    this.client = relay.client(app, {
+      service: "database",
+      url: this.app.config.databaseUrl
     });
   }
 

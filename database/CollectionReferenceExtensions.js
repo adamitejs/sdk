@@ -6,57 +6,31 @@ const DocumentSnapshot = require("./DocumentSnapshot");
 const CollectionSnapshot = require("./CollectionSnapshot");
 
 CollectionReference.prototype.create = async function(data) {
-  return new Promise((resolve, reject) => {
-    const app = App.getApp(this.database.app.name);
-    const {
-      database: { client }
-    } = app.plugins;
+  const app = App.getApp(this.database.app.name);
+  const {
+    database: { client }
+  } = app.plugins;
 
-    client.emit(
-      "command",
-      {
-        name: "database.createDocument",
-        args: {
-          ref: DatabaseSerializer.serializeCollectionReference(this),
-          data
-        }
-      },
-      response => {
-        if (response.error) return reject(response.error);
-        const {
-          snapshot: { ref, data }
-        } = response;
-        resolve(new DocumentSnapshot(ref, data));
-      }
-    );
+  const { snapshot } = await client.invoke("createDocument", {
+    ref: DatabaseSerializer.serializeCollectionReference(this),
+    data
   });
+
+  return new DocumentSnapshot(snapshot.ref, snapshot.data);
 };
 
 CollectionReference.prototype.get = async function(data) {
-  return new Promise((resolve, reject) => {
-    const app = App.getApp(this.database.app.name);
-    const {
-      database: { client }
-    } = app.plugins;
+  const app = App.getApp(this.database.app.name);
+  const {
+    database: { client }
+  } = app.plugins;
 
-    client.emit(
-      "command",
-      {
-        name: "database.readCollection",
-        args: {
-          ref: DatabaseSerializer.serializeCollectionReference(this),
-          data
-        }
-      },
-      response => {
-        if (response.error) return reject(response.error);
-        const {
-          snapshot: { ref, data }
-        } = response;
-        resolve(new CollectionSnapshot(ref, data));
-      }
-    );
+  const { snapshot } = await client.invoke("readCollection", {
+    ref: DatabaseSerializer.serializeCollectionReference(this),
+    data
   });
+
+  return new CollectionSnapshot(snapshot.ref, snapshot.data);
 };
 
 CollectionReference.prototype.onSnapshot = async function(callback) {

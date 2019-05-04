@@ -16,60 +16,11 @@ class CollectionStream {
    * @param {CollectionReference} collectionReference
    */
   constructor(databasePlugin, collectionReference) {
+    this.databasePlugin = databasePlugin;
     this.collectionReference = collectionReference;
     this.lastSnapshot = null;
     this.handlers = [];
-
-    const client = databasePlugin.client;
-
-    client.emit(
-      "command",
-      {
-        name: "database.subscribeCollection",
-        args: {
-          ref: DatabaseSerializer.serializeCollectionReference(
-            collectionReference
-          ),
-          initialValues: true
-        }
-      },
-      response => {
-        if (response.error) {
-          return reject(response.error);
-        } else {
-          const {
-            subscription: { id }
-          } = response;
-
-          client.on(id, update => {
-            if (update.error) {
-              return reject(response.error);
-            } else {
-              const oldSnapshot =
-                update.oldSnapshot &&
-                new DocumentSnapshot(
-                  update.oldSnapshot.ref,
-                  update.oldSnapshot.data
-                );
-              const newSnapshot =
-                update.newSnapshot &&
-                new DocumentSnapshot(
-                  update.newSnapshot.ref,
-                  update.newSnapshot.data
-                );
-              const result = {
-                changeType: update.changeType,
-                newSnapshot,
-                oldSnapshot
-              };
-              this.lastSnapshot = newSnapshot;
-              for (var i = this.handlers.length - 1; i >= 0; i--)
-                this.handlers[i](result);
-            }
-          });
-        }
-      }
-    );
+    this._subscribe();
   }
 
   /**
@@ -90,6 +41,40 @@ class CollectionStream {
     }
 
     this.handlers.push(handler);
+  }
+
+  async _subscribe() {
+    const client = this.databasePlugin.client;
+
+    const { subscription } = await client.invoke("subscribeCollection", {
+      ref: DatabaseSerializer.serializeCollectionReference(
+        this.collectionReference
+      ),
+      initialValues: true
+    });
+
+    client.socket.on(subscription.id, this._handleUpdate.bind(this));
+  }
+
+  _handleUpdate(update) {
+    if (update.error) {
+      return reject(response.error);
+    } else {
+      const oldSnapshot =
+        update.oldSnapshot &&
+        new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
+      const newSnapshot =
+        update.newSnapshot &&
+        new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
+      const result = {
+        changeType: update.changeType,
+        newSnapshot,
+        oldSnapshot
+      };
+      this.lastSnapshot = newSnapshot;
+      for (var i = this.handlers.length - 1; i >= 0; i--)
+        this.handlers[i](result);
+    }
   }
 }
 
