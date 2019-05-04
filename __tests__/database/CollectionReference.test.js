@@ -10,7 +10,10 @@ describe("CollectionReference", () => {
       const collectionRef = new CollectionReference("users", databaseRef);
       expect(collectionRef.name).toBe("users");
       expect(collectionRef.hash).toBe(
-        new Buffer("default/default/users").toString("base64")
+        new Buffer(
+          "default/default/users?q=" +
+            encodeURIComponent(JSON.stringify(collectionRef.query))
+        ).toString("base64")
       );
     });
   });

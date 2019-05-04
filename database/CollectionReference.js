@@ -1,3 +1,4 @@
+const qs = require("querystring");
 const DocumentReference = require("./DocumentReference");
 
 class CollectionReference {
@@ -9,7 +10,9 @@ class CollectionReference {
 
   get hash() {
     return new Buffer(
-      `${this.database.app.name}/${this.database.name}/${this.name}`
+      `${this.database.app.name}/${this.database.name}/${
+        this.name
+      }?q=${encodeURIComponent(JSON.stringify(this.query))}`
     ).toString("base64");
   }
 
