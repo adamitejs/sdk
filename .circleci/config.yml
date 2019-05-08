@@ -19,6 +19,10 @@ jobs: # a collection of steps
           paths:
             - ~/.cache/yarn
 
+      - run:
+          name: build
+          command: npm run build
+
       - run: # run tests
           name: test
           command: npm test

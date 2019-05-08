@@ -14,9 +14,7 @@ yarn add @adamite/sdk
 Initialize your app...
 
 ```js
-const adamite = require("@adamite/sdk");
-const { AuthPlugin } = require("@adamite/sdk/auth");
-const { DatabasePlugin } = require("@adamite/sdk/database");
+const { adamite, AuthPlugin, DatabasePlugin } = require("@adamite/sdk");
 
 adamite.use(AuthPlugin);
 adamite.use(DatabasePlugin);
