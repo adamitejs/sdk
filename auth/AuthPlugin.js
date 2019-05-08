@@ -1,31 +1,19 @@
-const { EventEmitter } = require("events");
-const querystring = require("querystring");
-const io = require("socket.io-client");
 const jwt = require("jsonwebtoken");
+const relay = require("@adamite/relay");
+const { EventEmitter } = require("events");
 
 class AuthPlugin extends EventEmitter {
   constructor(app) {
     super();
 
     this.app = app;
-    this.client = io(this.url);
     this.app.auth = () => this;
-
-    this.client.on("connect", () => {
-      this.app.log("auth", "connected");
-    });
-
-    this.client.on("disconnect", r => {
-      this.app.log("auth", "disconnected");
-      console.log(r);
-    });
-
-    this.client.on("error", r => {
-      this.app.log("auth", "error");
-      console.log(r);
-    });
-
     this._loadAuthState();
+
+    this.client = relay.client(app, {
+      service: "auth",
+      url: this.app.config.authUrl
+    });
   }
 
   get currentUser() {
@@ -42,75 +30,32 @@ class AuthPlugin extends EventEmitter {
     }
   }
 
-  get url() {
-    const qs = querystring.encode({
-      key: this.app.config.apiKey,
-      ...(this.app.config.queryString || {})
-    });
-
-    return `${this.app.config.authUrl}?${qs}`;
-  }
-
   async createUser(email, password) {
-    return new Promise((resolve, reject) => {
-      this.client.emit(
-        "command",
-        {
-          name: "auth.createUser",
-          args: { email, password }
-        },
-        ({ error, token }) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-
-          this._saveAuthState(token);
-          resolve(this.currentUser);
-        }
-      );
+    const { token } = await this.client.invoke("createUser", {
+      email,
+      password
     });
+
+    this._saveAuthState(token);
+    return this.currentUser;
   }
 
   async loginWithEmailAndPassword(email, password) {
-    return new Promise((resolve, reject) => {
-      this.client.emit(
-        "command",
-        {
-          name: "auth.loginWithEmailAndPassword",
-          args: { email, password }
-        },
-        ({ error, token }) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-
-          this._saveAuthState(token);
-          resolve(this.currentUser);
-        }
-      );
+    const { token } = await this.client.invoke("loginWithEmailAndPassword", {
+      email,
+      password
     });
+
+    this._saveAuthState(token);
+    return this.currentUser;
   }
 
   async validateToken(token) {
-    return new Promise((resolve, reject) => {
-      this.client.emit(
-        "command",
-        {
-          name: "auth.validateToken",
-          args: { token }
-        },
-        ({ error, data }) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-
-          resolve(data);
-        }
-      );
+    const { data } = await this.client.invoke("validateToken", {
+      token
     });
+
+    return data;
   }
 
   logout() {
@@ -132,7 +77,7 @@ class AuthPlugin extends EventEmitter {
 
   _saveAuthState(token) {
     this.currentToken = token;
-    this.emit("authStateChange", this.currentToken);
+    this.emit("authStateChange", this.currentUser);
     if (typeof window === "undefined" || !window.localStorage) return;
     window.localStorage.setItem(
       `adamite:auth:${this.app.ref.name}.token`,
@@ -142,7 +87,7 @@ class AuthPlugin extends EventEmitter {
 
   _clearAuthState() {
     this.currentToken = null;
-    this.emit("authStateChange", this.currentToken);
+    this.emit("authStateChange", this.currentUser);
     if (typeof window === "undefined" || !window.localStorage) return;
     window.localStorage.removeItem(`adamite:auth:${this.app.ref.name}.token`);
   }
