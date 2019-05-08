@@ -1,6 +1,6 @@
-import DatabaseDeserializer from "../core/serialization/DatabaseDeserializer";
+import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
 import DocumentReference from "./DocumentReference";
-import { SerializedDocumentRef } from "../core/serialization/SerializationTypes";
+import { SerializedDocumentRef } from "../serialization/SerializationTypes";
 
 class DocumentSnapshot {
   public ref: DocumentReference;

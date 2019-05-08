@@ -1,10 +1,10 @@
-import DatabaseDeserializer from "../core/serialization/DatabaseDeserializer";
+import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
 import DocumentSnapshot from "./DocumentSnapshot";
 import CollectionReference from "./CollectionReference";
 import {
   SerializedDocumentRef,
   SerializedCollectionRef
-} from "../core/serialization/SerializationTypes";
+} from "../serialization/SerializationTypes";
 
 class CollectionSnapshot {
   public ref: CollectionReference;

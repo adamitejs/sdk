@@ -1,4 +1,4 @@
-import DatabaseSerializer from "../core/serialization/DatabaseSerializer";
+import DatabaseSerializer from "../serialization/DatabaseSerializer";
 import DocumentSnapshot from "./DocumentSnapshot";
 import DatabasePlugin from "./DatabasePlugin";
 import DocumentReference from "./DocumentReference";

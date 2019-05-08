@@ -1,7 +1,7 @@
-import DatabaseReference from "../../database/DatabaseReference";
+import DatabaseReference from "../database/DatabaseReference";
 import AppSerializer from "./AppSerializer";
-import CollectionReference from "../../database/CollectionReference";
-import DocumentReference from "../../database/DocumentReference";
+import CollectionReference from "../database/CollectionReference";
+import DocumentReference from "../database/DocumentReference";
 import {
   SerializedDatabaseRef,
   SerializedCollectionRef,

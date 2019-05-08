@@ -1,7 +1,7 @@
 import DocumentReference from "./DocumentReference";
 
 import App from "../app/App";
-import DatabaseSerializer from "../core/serialization/DatabaseSerializer";
+import DatabaseSerializer from "../serialization/DatabaseSerializer";
 import DocumentSnapshot from "./DocumentSnapshot";
 import {
   DocumentStreamCallback,
@@ -9,7 +9,7 @@ import {
   StreamChanges,
   StreamOptions
 } from "./DatabaseTypes";
-import DatabaseDeserializer from "../core/serialization/DatabaseDeserializer";
+import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
 
 (DocumentReference.prototype as any).get = async function() {
   const app = App.getApp(this.collection.database.app.name);

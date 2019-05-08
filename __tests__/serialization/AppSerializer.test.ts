@@ -1,5 +1,5 @@
-import AppReference from "../../../src/app/AppReference";
-import AppSerializer from "../../../src/core/serialization/AppSerializer";
+import AppReference from "../../src/app/AppReference";
+import AppSerializer from "../../src/serialization/AppSerializer";
 
 describe("AppSerializer", () => {
   describe("serializeAppReference", () => {

@@ -1,4 +1,4 @@
-import { CollectionQuery } from "../../database/DatabaseTypes";
+import { CollectionQuery } from "../database/DatabaseTypes";
 
 export type SerializedRef = {
   type: string;

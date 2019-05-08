@@ -1,4 +1,4 @@
-import AppReference from "../../app/AppReference";
+import AppReference from "../app/AppReference";
 
 class AppSerializer {
   static serializeAppReference(appRef: AppReference) {

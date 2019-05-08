@@ -1,7 +1,7 @@
 import CollectionReference from "./CollectionReference";
 
 import App from "../app/App";
-import DatabaseSerializer from "../core/serialization/DatabaseSerializer";
+import DatabaseSerializer from "../serialization/DatabaseSerializer";
 import DocumentSnapshot from "./DocumentSnapshot";
 import CollectionSnapshot from "./CollectionSnapshot";
 import {
@@ -10,9 +10,10 @@ import {
   CollectionStreamCallback,
   StreamOptions
 } from "./DatabaseTypes";
-import DatabaseDeserializer from "../core/serialization/DatabaseDeserializer";
+import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
 
 (CollectionReference.prototype as any).create = async function(data: any) {
+  debugger;
   const app = App.getApp(this.database.app.name);
   const {
     database: { client }

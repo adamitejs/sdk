@@ -3,12 +3,17 @@
   "description": "Adamite client SDK.",
   "version": "0.1.0",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "watch": "tsc-watch"
+    "watch": "tsc-watch",
+    "prepare": "npm run build"
   },
+  "files": [
+    "dist/**/*"
+  ],
   "dependencies": {
     "@types/jsonwebtoken": "^8.3.2",
     "@types/socket.io-client": "^1.4.32",

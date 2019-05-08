@@ -1,9 +1,9 @@
-import DatabaseSerializer from "../../../src/core/serialization/DatabaseSerializer";
-import DatabaseDeserializer from "../../../src/core/serialization/DatabaseDeserializer";
-import AppReference from "../../../src/app/AppReference";
-import DatabaseReference from "../../../src/database/DatabaseReference";
-import CollectionReference from "../../../src/database/CollectionReference";
-import DocumentReference from "../../../src/database/DocumentReference";
+import DatabaseSerializer from "../../src/serialization/DatabaseSerializer";
+import DatabaseDeserializer from "../../src/serialization/DatabaseDeserializer";
+import AppReference from "../../src/app/AppReference";
+import DatabaseReference from "../../src/database/DatabaseReference";
+import CollectionReference from "../../src/database/CollectionReference";
+import DocumentReference from "../../src/database/DocumentReference";
 
 describe("DatabaseDeserializer", () => {
   describe("deserializeDatabaseReference", () => {

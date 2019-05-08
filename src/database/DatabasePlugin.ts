@@ -1,5 +1,5 @@
 import querystring from "querystring";
-import relay from "@adamite/relay";
+import * as relay from "@adamite/relay";
 import DatabaseReference from "./DatabaseReference";
 import DocumentStream from "./DocumentStream";
 import CollectionStream from "./CollectionStream";
