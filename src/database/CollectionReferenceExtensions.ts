@@ -13,7 +13,6 @@ import {
 import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
 
 (CollectionReference.prototype as any).create = async function(data: any) {
-  debugger;
   const app = App.getApp(this.database.app.name);
   const {
     database: { client }
@@ -48,17 +47,17 @@ import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
   callback: CollectionSnapshotCallback
 ) {
   // create the in-memory snapshot if needed
-  this._snapshot = this._snapshot || new CollectionSnapshot(this);
+  this.snapshot = this.snapshot || new CollectionSnapshot(this);
 
   this.stream(
     ({ changeType, oldSnapshot, newSnapshot }: StreamChanges) => {
       // mutate the in-memory snapshot, and send it in the callback
-      this._snapshot = this._snapshot.mutate(
+      this.snapshot = this.snapshot.mutate(
         changeType,
         oldSnapshot,
         newSnapshot
       );
-      callback(this._snapshot, { newSnapshot, oldSnapshot, changeType });
+      callback(this.snapshot, { newSnapshot, oldSnapshot, changeType });
     },
     { initialValues: true }
   );

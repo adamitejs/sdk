@@ -33,11 +33,11 @@ class CollectionSnapshot {
     newSnapshot: DocumentSnapshot
   ) {
     if (changeType === "create") {
-      this._handleCreate(newSnapshot);
+      this.handleCreate(newSnapshot);
     } else if (changeType === "delete") {
-      this._handleDelete(oldSnapshot);
+      this.handleDelete(oldSnapshot);
     } else if (changeType === "update") {
-      this._handleUpdate(newSnapshot, oldSnapshot);
+      this.handleUpdate(newSnapshot, oldSnapshot);
     }
 
     const mutatedSnapshot = new CollectionSnapshot(this.ref);
@@ -45,11 +45,11 @@ class CollectionSnapshot {
     return mutatedSnapshot;
   }
 
-  _handleCreate(newSnapshot: DocumentSnapshot) {
+  private handleCreate(newSnapshot: DocumentSnapshot) {
     this.docs = [...this.docs, newSnapshot];
   }
 
-  _handleDelete(newSnapshot: DocumentSnapshot) {
+  private handleDelete(newSnapshot: DocumentSnapshot) {
     const index = this.docs.findIndex(
       snapshot => snapshot.ref.id === newSnapshot.ref.id
     );
@@ -58,7 +58,10 @@ class CollectionSnapshot {
     this.docs = [...this.docs.slice(0, index), ...this.docs.slice(index + 1)];
   }
 
-  _handleUpdate(newSnapshot: DocumentSnapshot, oldSnapshot: DocumentSnapshot) {
+  private handleUpdate(
+    newSnapshot: DocumentSnapshot,
+    oldSnapshot: DocumentSnapshot
+  ) {
     const index = this.docs.findIndex(
       snapshot => snapshot.ref.id === oldSnapshot.ref.id
     );

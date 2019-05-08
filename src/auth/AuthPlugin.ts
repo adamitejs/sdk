@@ -20,7 +20,7 @@ class AuthPlugin extends EventEmitter {
 
     this.app = app;
     (this.app as any).auth = () => this;
-    this._loadAuthState();
+    this.loadAuthState();
 
     this.client = relay.client(app, {
       service: "auth",
@@ -48,7 +48,7 @@ class AuthPlugin extends EventEmitter {
       password
     });
 
-    this._saveAuthState(token);
+    this.saveAuthState(token);
     return this.currentUser;
   }
 
@@ -58,7 +58,7 @@ class AuthPlugin extends EventEmitter {
       password
     });
 
-    this._saveAuthState(token);
+    this.saveAuthState(token);
     return this.currentUser;
   }
 
@@ -71,7 +71,7 @@ class AuthPlugin extends EventEmitter {
   }
 
   logout() {
-    this._clearAuthState();
+    this.clearAuthState();
   }
 
   onAuthStateChange(callback: AuthStateChangeCallback) {
@@ -80,7 +80,7 @@ class AuthPlugin extends EventEmitter {
     return () => this.off("authStateChange", callback);
   }
 
-  _loadAuthState() {
+  private loadAuthState() {
     if (typeof window === "undefined" || !window.localStorage) return;
 
     const tokenKey = `adamite:auth:${this.app.ref.name}.token`;
@@ -89,7 +89,7 @@ class AuthPlugin extends EventEmitter {
     this.currentToken = localStorageToken || undefined;
   }
 
-  _saveAuthState(token: string) {
+  private saveAuthState(token: string) {
     this.currentToken = token;
     this.emit("authStateChange", this.currentUser);
     if (typeof window === "undefined" || !window.localStorage) return;
@@ -97,7 +97,7 @@ class AuthPlugin extends EventEmitter {
     window.localStorage.setItem(tokenKey, token);
   }
 
-  _clearAuthState() {
+  private clearAuthState() {
     this.currentToken = undefined;
     this.emit("authStateChange", this.currentUser);
     if (typeof window === "undefined" || !window.localStorage) return;

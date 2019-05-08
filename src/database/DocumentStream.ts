@@ -33,7 +33,7 @@ class DocumentStream {
     this.databasePlugin = databasePlugin;
     this.documentReference = documentReference;
     this.handlers = [];
-    this._subscribe();
+    this.subscribe();
   }
 
   /**
@@ -56,7 +56,7 @@ class DocumentStream {
     this.handlers.push(handler);
   }
 
-  async _subscribe() {
+  private async subscribe() {
     const client = this.databasePlugin.client;
 
     const { subscription } = await client.invoke("subscribeDocument", {
@@ -66,10 +66,10 @@ class DocumentStream {
       initialValues: true
     });
 
-    client.socket.on(subscription.id, this._handleUpdate.bind(this));
+    client.socket.on(subscription.id, this.handleUpdate.bind(this));
   }
 
-  _handleUpdate(update: StreamChanges) {
+  private handleUpdate(update: StreamChanges) {
     const newSnapshot =
       update.newSnapshot &&
       new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
