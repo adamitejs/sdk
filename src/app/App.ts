@@ -76,7 +76,7 @@ class App {
     return (global as any).__ARC__.apps;
   }
 
-  static getApp(name: string) {
+  static getApp(name: string): App {
     App.setGlobals();
     (global as any).__ARC__.apps[name] =
       (global as any).__ARC__.apps[name] || new App(new AppReference(name));

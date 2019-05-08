@@ -1,6 +1,6 @@
 import { App } from "./src/app";
 
-const adamite = function(name = "default") {
+const adamite = function(name = "default"): App {
   return App.getApp(name);
 };
 
@@ -10,6 +10,7 @@ adamite.use = function(plugin: any) {
   });
 };
 
+export * from "./src/app";
 export * from "./src/database";
 export * from "./src/serialization";
 
