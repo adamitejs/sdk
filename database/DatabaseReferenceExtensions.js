@@ -1,1 +1,0 @@
-const DatabaseReference = require("./DatabaseReference");
