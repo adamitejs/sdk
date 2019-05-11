@@ -1,6 +1,6 @@
 import { client } from "@adamite/relay";
 import { EventEmitter } from "events";
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import App from "../app/App";
 import {
   AuthServiceToken,
@@ -26,8 +26,6 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 
   initialize() {
-    debugger;
-
     this.client = client(this.app, {
       service: "auth",
       url: this.app.config.authUrl
@@ -61,8 +59,6 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 
   async loginWithEmailAndPassword(email: string, password: string) {
-    debugger;
-
     const { token } = await this.client.invoke("loginWithEmailAndPassword", {
       email,
       password
