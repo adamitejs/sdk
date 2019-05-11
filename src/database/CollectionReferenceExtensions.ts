@@ -11,12 +11,11 @@ import {
   StreamOptions
 } from "./DatabaseTypes";
 import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
+import DatabasePlugin from "./DatabasePlugin";
 
 (CollectionReference.prototype as any).create = async function(data: any) {
   const app = App.getApp(this.database.app.name);
-  const {
-    database: { client }
-  } = app.plugins;
+  const { client } = app.plugins.database as DatabasePlugin;
 
   const { snapshot } = await client.invoke("createDocument", {
     ref: DatabaseSerializer.serializeCollectionReference(this),
@@ -31,9 +30,7 @@ import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
 
 (CollectionReference.prototype as any).get = async function(data: any) {
   const app = App.getApp(this.database.app.name);
-  const {
-    database: { client }
-  } = app.plugins;
+  const { client } = app.plugins.database as DatabasePlugin;
 
   const { snapshot } = await client.invoke("readCollection", {
     ref: DatabaseSerializer.serializeCollectionReference(this),
@@ -67,7 +64,7 @@ import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
   callback: CollectionStreamCallback,
   { initialValues = false }: StreamOptions
 ) {
-  App.getApp(this.database.app.name)
-    .plugins.database.collectionStream(this)
-    .register(callback, initialValues);
+  const app = App.getApp(this.database.app.name);
+  const database = app.plugins.database as DatabasePlugin;
+  database.collectionStream(this).register(callback, initialValues);
 };

@@ -1,14 +1,15 @@
 import { client } from "@adamite/relay";
 import { EventEmitter } from "events";
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import App from "../app/App";
 import {
   AuthServiceToken,
   AuthStateChangeCallback,
   AuthUser
 } from "./AuthTypes";
+import { AdamitePlugin } from "../app";
 
-class AuthPlugin extends EventEmitter {
+class AuthPlugin extends EventEmitter implements AdamitePlugin {
   public app: App;
 
   public client: any;
@@ -17,15 +18,20 @@ class AuthPlugin extends EventEmitter {
 
   constructor(app: App) {
     super();
-
     this.app = app;
-    (this.app as any).auth = () => this;
-    this.loadAuthState();
+  }
 
-    this.client = client(app, {
+  getPluginName() {
+    return "auth";
+  }
+
+  initialize() {
+    this.client = client(this.app, {
       service: "auth",
       url: this.app.config.authUrl
     });
+
+    this.loadAuthState();
   }
 
   get currentUser(): AuthUser {

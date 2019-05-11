@@ -6,28 +6,32 @@ import CollectionStream from "./CollectionStream";
 import App from "../app/App";
 import DocumentReference from "./DocumentReference";
 import CollectionReference from "./CollectionReference";
+import { AdamitePlugin } from "../app";
 
-class DatabasePlugin {
+class DatabasePlugin implements AdamitePlugin {
   public app: App;
 
   public client: any;
 
-  public documentStreamCache: any;
+  private documentStreamCache: any;
 
-  public collectionStreamCache: any;
+  private collectionStreamCache: any;
 
   constructor(app: App) {
     this.app = app;
-    (this.app as any).database = this.database.bind(this);
-
-    // Intialisation of Caches.
     this.documentStreamCache = {};
     this.collectionStreamCache = {};
+  }
 
-    this.client = client(app, {
+  initialize(): void {
+    this.client = client(this.app, {
       service: "database",
       url: this.app.config.databaseUrl
     });
+  }
+
+  getPluginName(): string {
+    return "database";
   }
 
   /**
@@ -80,5 +84,4 @@ class DatabasePlugin {
   }
 }
 
-(DatabasePlugin as any).PLUGIN_NAME = "database";
 export default DatabasePlugin;

@@ -10,12 +10,11 @@ import {
   StreamOptions
 } from "./DatabaseTypes";
 import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
+import { DatabasePlugin } from ".";
 
 (DocumentReference.prototype as any).get = async function() {
   const app = App.getApp(this.collection.database.app.name);
-  const {
-    database: { client }
-  } = app.plugins;
+  const { client } = app.plugins.database as DatabasePlugin;
 
   const { snapshot } = await client.invoke("readDocument", {
     ref: DatabaseSerializer.serializeDocumentReference(this)
@@ -29,9 +28,7 @@ import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
 
 (DocumentReference.prototype as any).update = async function(data: any) {
   const app = App.getApp(this.collection.database.app.name);
-  const {
-    database: { client }
-  } = app.plugins;
+  const { client } = app.plugins.database as DatabasePlugin;
 
   const { snapshot } = await client.invoke("updateDocument", {
     ref: DatabaseSerializer.serializeDocumentReference(this),
@@ -46,9 +43,7 @@ import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
 
 (DocumentReference.prototype as any).delete = async function() {
   const app = App.getApp(this.collection.database.app.name);
-  const {
-    database: { client }
-  } = app.plugins;
+  const { client } = app.plugins.database as DatabasePlugin;
 
   const { snapshot } = await client.invoke("deleteDocument", {
     ref: DatabaseSerializer.serializeDocumentReference(this)
@@ -76,7 +71,7 @@ import DatabaseDeserializer from "../serialization/DatabaseDeserializer";
   callback: DocumentStreamCallback,
   { initialValues = false }: StreamOptions
 ) {
-  App.getApp(this.collection.database.app.name)
-    .plugins.database.documentStream(this)
-    .register(callback, initialValues);
+  const app = App.getApp(this.collection.database.app.name);
+  const database = app.plugins.database as DatabasePlugin;
+  database.documentStream(this).register(callback, initialValues);
 };
