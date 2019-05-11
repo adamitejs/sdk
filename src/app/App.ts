@@ -1,47 +1,57 @@
 import { merge } from "lodash";
 import AppReference from "./AppReference";
-import { PluginInitializer } from "./AppTypes";
+import AdamitePlugin from "./AdamitePlugin";
+import { DatabaseReference } from "../database";
+import { AuthPlugin } from "../auth";
 
 class App {
   public ref: AppReference;
 
-  public plugins: any;
+  public plugins: { [name: string]: AdamitePlugin };
 
-  public config: any;
+  public config: { [key: string]: any };
 
   constructor(ref: AppReference) {
     this.ref = ref;
     this.plugins = {};
+    this.config = { logLevel: 0 };
+  }
+
+  use(plugin: AdamitePlugin) {
+    const pluginInstance = new (plugin as any)(this) as AdamitePlugin;
+    const pluginName = pluginInstance.getPluginName();
+    this.plugins[pluginName] = pluginInstance;
+    return this;
   }
 
   initializeApp(config: any) {
-    const DEFAULT_CONFIG = {
-      logLevel: 0
-    };
-
-    this.config = merge(DEFAULT_CONFIG, config);
+    this.config = merge(this.config, config);
     this.initializePlugins();
-  }
-
-  initializePlugins() {
-    for (const pluginName in App.getPlugins()) {
-      const initializePlugin = App.getPlugin(pluginName);
-      this.plugins[pluginName] = initializePlugin(this);
-    }
+    return this;
   }
 
   plugin(name: string) {
     return this.plugins[name];
   }
 
-  error(plugin: string, message: string) {
-    if (this.config.logLevel < 2) return;
-    console.error(`⚡ [${plugin}]\t${message}`);
+  database(name: string = "default"): DatabaseReference {
+    if (!this.plugins.database) {
+      throw new Error(
+        "The database plugin is not enabled on app instance: " + this.ref.name
+      );
+    }
+
+    return new DatabaseReference(name, this.ref);
   }
 
-  warn(plugin: string, message: string) {
-    if (this.config.logLevel < 1) return;
-    console.warn(`⚡ [${plugin}]\t${message}`);
+  auth(): AuthPlugin {
+    if (!this.plugins.auth) {
+      throw new Error(
+        "The auth plugin is not enabled on app instance: " + this.ref.name
+      );
+    }
+
+    return this.plugins.auth as AuthPlugin;
   }
 
   log(plugin: string, message: string) {
@@ -49,38 +59,34 @@ class App {
     console.log(`⚡ [${plugin}]\t${message}`);
   }
 
-  static setGlobals() {
-    (global as any).__ARC__ = (global as any).__ARC__ || {
-      apps: {},
-      plugins: {}
-    };
+  warn(plugin: string, message: string) {
+    if (this.config.logLevel < 1) return;
+    console.warn(`⚡ [${plugin}]\t${message}`);
   }
 
-  static addPlugin(name: string, initializer: PluginInitializer) {
-    App.setGlobals();
-    (global as any).__ARC__.plugins[name] = initializer;
+  error(plugin: string, message: string) {
+    if (this.config.logLevel < 2) return;
+    console.error(`⚡ [${plugin}]\t${message}`);
   }
 
-  static getPlugin(name: string) {
-    App.setGlobals();
-    return (global as any).__ARC__.plugins[name];
+  private initializePlugins() {
+    for (const pluginName in this.plugins) {
+      const pluginInstance = this.plugins[pluginName];
+      pluginInstance.initialize();
+    }
   }
 
-  static getPlugins() {
-    App.setGlobals();
-    return (global as any).__ARC__.plugins;
+  private static initializeGlobals() {
+    const _global = global as any;
+    _global.__ADAMITE_APPS__ = _global.__ADAMITE_APPS__ || {};
   }
 
-  static getApps() {
-    App.setGlobals();
-    return (global as any).__ARC__.apps;
-  }
-
-  static getApp(name: string): App {
-    App.setGlobals();
-    (global as any).__ARC__.apps[name] =
-      (global as any).__ARC__.apps[name] || new App(new AppReference(name));
-    return (global as any).__ARC__.apps[name];
+  static getApp(name: string = "default"): App {
+    this.initializeGlobals();
+    const _global = global as any;
+    _global.__ADAMITE_APPS__[name] =
+      _global.__ADAMITE_APPS__[name] || new App(new AppReference(name));
+    return _global.__ADAMITE_APPS__[name];
   }
 }
 

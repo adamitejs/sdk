@@ -7,8 +7,9 @@ import {
   AuthStateChangeCallback,
   AuthUser
 } from "./AuthTypes";
+import { AdamitePlugin } from "../app";
 
-class AuthPlugin extends EventEmitter {
+class AuthPlugin extends EventEmitter implements AdamitePlugin {
   public app: App;
 
   public client: any;
@@ -17,15 +18,22 @@ class AuthPlugin extends EventEmitter {
 
   constructor(app: App) {
     super();
-
     this.app = app;
-    (this.app as any).auth = () => this;
-    this.loadAuthState();
+  }
 
-    this.client = client(app, {
+  getPluginName() {
+    return "auth";
+  }
+
+  initialize() {
+    debugger;
+
+    this.client = client(this.app, {
       service: "auth",
       url: this.app.config.authUrl
     });
+
+    this.loadAuthState();
   }
 
   get currentUser(): AuthUser {
@@ -53,6 +61,8 @@ class AuthPlugin extends EventEmitter {
   }
 
   async loginWithEmailAndPassword(email: string, password: string) {
+    debugger;
+
     const { token } = await this.client.invoke("loginWithEmailAndPassword", {
       email,
       password
