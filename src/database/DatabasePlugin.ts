@@ -1,5 +1,5 @@
 import querystring from "querystring";
-import * as relay from "@adamite/relay";
+import { client } from "@adamite/relay";
 import DatabaseReference from "./DatabaseReference";
 import DocumentStream from "./DocumentStream";
 import CollectionStream from "./CollectionStream";
@@ -24,7 +24,7 @@ class DatabasePlugin {
     this.documentStreamCache = {};
     this.collectionStreamCache = {};
 
-    this.client = relay.client(app, {
+    this.client = client(app, {
       service: "database",
       url: this.app.config.databaseUrl
     });

@@ -11,6 +11,7 @@ adamite.use = function(plugin: any) {
 };
 
 export * from "./src/app";
+export * from "./src/auth";
 export * from "./src/database";
 export * from "./src/serialization";
 

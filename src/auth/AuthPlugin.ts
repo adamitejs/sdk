@@ -1,4 +1,4 @@
-import relay from "@adamite/relay";
+import { client } from "@adamite/relay";
 import { EventEmitter } from "events";
 import jwt from "jsonwebtoken";
 import App from "../app/App";
@@ -22,7 +22,7 @@ class AuthPlugin extends EventEmitter {
     (this.app as any).auth = () => this;
     this.loadAuthState();
 
-    this.client = relay.client(app, {
+    this.client = client(app, {
       service: "auth",
       url: this.app.config.authUrl
     });
