@@ -10,8 +10,5 @@ export { default as DocumentStream } from "./DocumentStream";
 export { default as DatabaseServerValue } from "./DatabaseServerValue";
 
 export { default as DatabasePlugin } from "./DatabasePlugin";
-export * from "./DatabaseTypes";
 
-require("./DatabaseReferenceExtensions");
-require("./CollectionReferenceExtensions");
-require("./DocumentReferenceExtensions");
+export * from "./DatabaseTypes";

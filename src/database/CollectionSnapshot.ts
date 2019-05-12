@@ -29,14 +29,14 @@ class CollectionSnapshot {
 
   mutate(
     changeType: string,
-    oldSnapshot: DocumentSnapshot,
-    newSnapshot: DocumentSnapshot
+    oldSnapshot: DocumentSnapshot | undefined,
+    newSnapshot: DocumentSnapshot | undefined
   ) {
-    if (changeType === "create") {
+    if (changeType === "create" && newSnapshot) {
       this.handleCreate(newSnapshot);
-    } else if (changeType === "delete") {
+    } else if (changeType === "delete" && oldSnapshot) {
       this.handleDelete(oldSnapshot);
-    } else if (changeType === "update") {
+    } else if (changeType === "update" && newSnapshot && oldSnapshot) {
       this.handleUpdate(newSnapshot, oldSnapshot);
     }
 
