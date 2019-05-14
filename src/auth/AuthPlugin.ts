@@ -1,4 +1,4 @@
-import { client } from "@adamite/relay";
+import client from "@adamite/relay-client";
 import { EventEmitter } from "events";
 import * as jwt from "jsonwebtoken";
 import App from "../app/App";

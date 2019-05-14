@@ -1,1 +1,1 @@
-declare module "@adamite/relay";
+declare module "@adamite/relay-client";
