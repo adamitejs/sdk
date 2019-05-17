@@ -1,5 +1,5 @@
 import querystring from "querystring";
-import { client } from "@adamite/relay";
+import client from "@adamite/relay-client";
 import DatabaseReference from "./DatabaseReference";
 import DocumentStream from "./DocumentStream";
 import CollectionStream from "./CollectionStream";
