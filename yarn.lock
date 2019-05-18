@@ -4,7 +4,7 @@
 
 "@adamite/relay-client@https://github.com/adamitejs/relay-client.git":
   version "0.1.0"
-  resolved "https://github.com/adamitejs/relay-client.git#4ff2b2f0b5aadcffaa16c332512ba06c608ef747"
+  resolved "https://github.com/adamitejs/relay-client.git#4cf50df122de751c57c735790d010115fe142b8c"
   dependencies:
     querystring "^0.2.0"
     socket.io-client "^2.2.0"
