@@ -24,9 +24,24 @@ class DatabasePlugin implements AdamitePlugin {
   }
 
   initialize(): void {
-    this.client = client(this.app, {
+    this.client = client({
       service: "database",
-      url: this.app.config.databaseUrl
+      url: this.app.config.databaseUrl,
+      apiKey: this.app.config.apiKey
+    });
+
+    this.client.on("connect", () => {
+      this.app.log("database", "connected");
+    });
+
+    this.client.on("disconnect", (r: any) => {
+      this.app.log("database", "disconnected");
+      console.log(r);
+    });
+
+    this.client.on("error", (r: any) => {
+      this.app.log("database", "error");
+      console.log(r);
     });
   }
 
