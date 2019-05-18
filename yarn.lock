@@ -2,8 +2,9 @@
 # yarn lockfile v1
 
 
-"@adamite/relay-client@file:../relay-client":
+"@adamite/relay-client@https://github.com/adamitejs/relay-client.git":
   version "0.1.0"
+  resolved "https://github.com/adamitejs/relay-client.git#4ff2b2f0b5aadcffaa16c332512ba06c608ef747"
   dependencies:
     querystring "^0.2.0"
     socket.io-client "^2.2.0"
