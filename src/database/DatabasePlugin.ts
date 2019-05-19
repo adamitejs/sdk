@@ -7,6 +7,7 @@ import App from "../app/App";
 import DocumentReference from "./DocumentReference";
 import CollectionReference from "./CollectionReference";
 import { AdamitePlugin } from "../app";
+import RelayClient from "@adamite/relay-client/dist/RelayClient";
 
 class DatabasePlugin implements AdamitePlugin {
   public app: App;
@@ -27,8 +28,21 @@ class DatabasePlugin implements AdamitePlugin {
     this.client = client({
       service: "database",
       url: this.app.config.databaseUrl,
-      apiKey: this.app.config.apiKey
+      apiKey: this.app.config.apiKey,
+      jwt: this.app.plugins["auth"] && this.app.auth().currentToken
     });
+
+    if (this.app.plugins["auth"]) {
+      this.app.auth().onAuthStateChange(authState => {
+        if (!this.client) return;
+
+        if (authState) {
+          this.client.updateJwt(authState.token);
+        } else {
+          this.client.updateJwt(undefined);
+        }
+      });
+    }
 
     this.client.on("connect", () => {
       this.app.log("database", "connected");

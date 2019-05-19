@@ -19,6 +19,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   constructor(app: App) {
     super();
     this.app = app;
+    this.loadAuthState();
   }
 
   getPluginName() {
@@ -45,11 +46,9 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
       this.app.log("auth", "error");
       console.log(r);
     });
-
-    this.loadAuthState();
   }
 
-  get currentUser(): AuthUser {
+  get currentUser(): AuthUser | undefined {
     if (!this.currentToken) return undefined;
 
     const decodedToken = jwt.decode(this.currentToken) as AuthServiceToken;
