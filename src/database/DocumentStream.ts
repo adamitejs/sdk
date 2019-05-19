@@ -14,9 +14,9 @@ class DocumentStream {
 
   public documentReference: DocumentReference;
 
-  public lastSnapshot: DocumentSnapshot | undefined;
-
   public handlers: DocumentStreamCallback[];
+
+  private subscribed: boolean = false;
 
   /**
    * Initialising a DocumentStream requires providing a DatabasePlugin from which
@@ -26,10 +26,7 @@ class DocumentStream {
    * @param {DatabasePlugin} databasePlugin
    * @param {DocumentReference} documentReference
    */
-  constructor(
-    databasePlugin: DatabasePlugin,
-    documentReference: DocumentReference
-  ) {
+  constructor(databasePlugin: DatabasePlugin, documentReference: DocumentReference) {
     this.databasePlugin = databasePlugin;
     this.documentReference = documentReference;
     this.handlers = [];
@@ -37,52 +34,39 @@ class DocumentStream {
   }
 
   /**
-   * Registers a handler. If the wantsInitialValue is true, and there is a snapshot of the
-   * document available, then the handler will IMMEDIATELY recieve this snapshot presented
-   * as a create update.
+   * Registers a handler.
    *
    * @param {Function} handler
-   * @param {Boolean} wantsInitialValue
    */
-  register(handler: DocumentStreamCallback, wantsInitialValue: boolean) {
-    if (wantsInitialValue && this.lastSnapshot != null) {
-      handler({
-        oldSnapshot: undefined,
-        newSnapshot: this.lastSnapshot,
-        changeType: "create"
-      });
-    }
-
+  async register(handler: DocumentStreamCallback) {
     this.handlers.push(handler);
   }
 
   private async subscribe() {
+    if (this.subscribed) return;
+
     const client = this.databasePlugin.client;
 
     const { subscription } = await client.invoke("subscribeDocument", {
-      ref: DatabaseSerializer.serializeDocumentReference(
-        this.documentReference
-      ),
-      initialValues: true
+      ref: DatabaseSerializer.serializeDocumentReference(this.documentReference)
     });
 
     client.socket.on(subscription.id, this.handleUpdate.bind(this));
+
+    this.subscribed = true;
   }
 
   private handleUpdate(update: StreamChanges) {
-    const newSnapshot =
-      update.newSnapshot &&
-      new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
-    const oldSnapshot =
-      update.oldSnapshot &&
-      new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
-    const result = {
-      newSnapshot,
-      oldSnapshot,
-      changeType: update.changeType
-    };
-    this.lastSnapshot = newSnapshot;
-    this.handlers.forEach(handler => handler(result));
+    const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
+    const oldSnapshot = update.oldSnapshot && new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
+
+    this.handlers.forEach(handler =>
+      handler({
+        newSnapshot,
+        oldSnapshot,
+        changeType: update.changeType
+      })
+    );
   }
 }
 

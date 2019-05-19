@@ -30,9 +30,7 @@ class CollectionReference {
 
   get hash() {
     return new Buffer(
-      `${this.database.app.name}/${this.database.name}/${
-        this.name
-      }?q=${encodeURIComponent(JSON.stringify(this.query))}`
+      `${this.database.app.name}/${this.database.name}/${this.name}?q=${encodeURIComponent(JSON.stringify(this.query))}`
     ).toString("base64");
   }
 
@@ -64,10 +62,7 @@ class CollectionReference {
       data
     });
 
-    return new DocumentSnapshot(
-      DatabaseDeserializer.deserializeDocumentReference(snapshot.ref),
-      snapshot.data
-    );
+    return new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(snapshot.ref), snapshot.data);
   }
 
   async get(): Promise<CollectionSnapshot> {
@@ -81,28 +76,24 @@ class CollectionReference {
     return new CollectionSnapshot(snapshot.ref, snapshot.data);
   }
 
-  onSnapshot(callback: CollectionSnapshotCallback) {
+  async onSnapshot(callback: CollectionSnapshotCallback) {
+    this.snapshot = await this.get();
+    callback(this.snapshot);
+
     this.stream(
       ({ changeType, oldSnapshot, newSnapshot }: StreamChanges) => {
         // create the in-memory snapshot if needed
         this.snapshot = this.snapshot || new CollectionSnapshot(this);
 
         // mutate the in-memory snapshot, and send it in the callback
-        this.snapshot = this.snapshot.mutate(
-          changeType,
-          oldSnapshot,
-          newSnapshot
-        );
+        this.snapshot = this.snapshot.mutate(changeType, oldSnapshot, newSnapshot);
         callback(this.snapshot, { newSnapshot, oldSnapshot, changeType });
       },
       { initialValues: true }
     );
   }
 
-  stream(
-    callback: CollectionStreamCallback,
-    { initialValues = false }: StreamOptions
-  ) {
+  stream(callback: CollectionStreamCallback, { initialValues = false }: StreamOptions) {
     const app = App.getApp(this.database.app.name);
     const database = app.plugins.database as DatabasePlugin;
     database.collectionStream(this).register(callback, initialValues);

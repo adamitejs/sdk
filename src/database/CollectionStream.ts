@@ -15,9 +15,9 @@ class CollectionStream {
 
   public collectionReference: CollectionReference;
 
-  public lastSnapshot: DocumentSnapshot | undefined;
-
   public handlers: CollectionStreamCallback[];
+
+  private subscribed: boolean = false;
 
   /**
    * Initialising a CollectionStream requires providing a DatabasePlugin from which
@@ -27,10 +27,7 @@ class CollectionStream {
    * @param {DatabasePlugin} databasePlugin
    * @param {CollectionReference} collectionReference
    */
-  constructor(
-    databasePlugin: DatabasePlugin,
-    collectionReference: CollectionReference
-  ) {
+  constructor(databasePlugin: DatabasePlugin, collectionReference: CollectionReference) {
     this.databasePlugin = databasePlugin;
     this.collectionReference = collectionReference;
     this.handlers = [];
@@ -38,52 +35,39 @@ class CollectionStream {
   }
 
   /**
-   * Registers a handler. If the wantsInitialValue is true, and there is a snapshot of the
-   * collection available, then the handler will IMMEDIATELY recieve this snapshot presented
-   * as a create update.
+   * Registers a handler.
    *
    * @param {Function} handler
-   * @param {Boolean} wantsInitialValue
    */
-  register(handler: CollectionStreamCallback, wantsInitialValue: boolean) {
-    if (wantsInitialValue && this.lastSnapshot != null) {
-      handler({
-        oldSnapshot: undefined,
-        newSnapshot: this.lastSnapshot,
-        changeType: "create"
-      });
-    }
-
+  register(handler: CollectionStreamCallback) {
     this.handlers.push(handler);
   }
 
   private async subscribe() {
+    if (this.subscribed) return;
+
     const client = this.databasePlugin.client;
 
     const { subscription } = await client.invoke("subscribeCollection", {
-      ref: DatabaseSerializer.serializeCollectionReference(
-        this.collectionReference
-      ),
-      initialValues: true
+      ref: DatabaseSerializer.serializeCollectionReference(this.collectionReference)
     });
 
     client.socket.on(subscription.id, this.handleUpdate.bind(this));
+
+    this.subscribed = true;
   }
 
   private handleUpdate(update: StreamChanges) {
-    const oldSnapshot =
-      update.oldSnapshot &&
-      new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
-    const newSnapshot =
-      update.newSnapshot &&
-      new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
-    const result = {
-      changeType: update.changeType,
-      newSnapshot,
-      oldSnapshot
-    };
-    this.lastSnapshot = newSnapshot;
-    this.handlers.forEach(handler => handler(result));
+    const oldSnapshot = update.oldSnapshot && new DocumentSnapshot(update.oldSnapshot.ref, update.oldSnapshot.data);
+    const newSnapshot = update.newSnapshot && new DocumentSnapshot(update.newSnapshot.ref, update.newSnapshot.data);
+
+    this.handlers.forEach(handler =>
+      handler({
+        changeType: update.changeType,
+        newSnapshot,
+        oldSnapshot
+      })
+    );
   }
 }
 

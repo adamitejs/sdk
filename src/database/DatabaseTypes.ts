@@ -19,16 +19,10 @@ export type StreamChanges = {
 
 export type StreamOptions = { initialValues: boolean };
 
-export type CollectionSnapshotCallback = (
-  snapshot: CollectionSnapshot,
-  changes: StreamChanges
-) => void;
+export type CollectionSnapshotCallback = (snapshot: CollectionSnapshot, changes?: StreamChanges) => void;
 
 export type CollectionStreamCallback = (changes: StreamChanges) => void;
 
-export type DocumentSnapshotCallback = (
-  snapshot: DocumentSnapshot,
-  changes: StreamChanges
-) => void;
+export type DocumentSnapshotCallback = (snapshot: DocumentSnapshot, changes?: StreamChanges) => void;
 
 export type DocumentStreamCallback = (changes: StreamChanges) => void;

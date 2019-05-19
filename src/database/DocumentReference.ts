@@ -3,12 +3,7 @@ import { DocumentSnapshot } from ".";
 import { App } from "../app";
 import DatabasePlugin from "./DatabasePlugin";
 import { DatabaseSerializer, DatabaseDeserializer } from "../serialization";
-import {
-  DocumentSnapshotCallback,
-  StreamChanges,
-  DocumentStreamCallback,
-  StreamOptions
-} from "./DatabaseTypes";
+import { DocumentSnapshotCallback, StreamChanges, DocumentStreamCallback, StreamOptions } from "./DatabaseTypes";
 
 class DocumentReference {
   public id: string;
@@ -22,9 +17,7 @@ class DocumentReference {
 
   get hash() {
     return new Buffer(
-      `${this.collection.database.name}/${this.collection.database.name}/${
-        this.collection.name
-      }/${this.id}`
+      `${this.collection.database.name}/${this.collection.database.name}/${this.collection.name}/${this.id}`
     ).toString("base64");
   }
 
@@ -36,10 +29,7 @@ class DocumentReference {
       ref: DatabaseSerializer.serializeDocumentReference(this)
     });
 
-    return new DocumentSnapshot(
-      DatabaseDeserializer.deserializeDocumentReference(snapshot.ref),
-      snapshot.data
-    );
+    return new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(snapshot.ref), snapshot.data);
   }
 
   async update(data: any): Promise<DocumentSnapshot> {
@@ -51,10 +41,7 @@ class DocumentReference {
       data
     });
 
-    return new DocumentSnapshot(
-      DatabaseDeserializer.deserializeDocumentReference(snapshot.ref),
-      snapshot.data
-    );
+    return new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(snapshot.ref), snapshot.data);
   }
 
   async delete(): Promise<DocumentSnapshot> {
@@ -65,29 +52,23 @@ class DocumentReference {
       ref: DatabaseSerializer.serializeDocumentReference(this)
     });
 
-    return new DocumentSnapshot(
-      DatabaseDeserializer.deserializeDocumentReference(snapshot.ref),
-      snapshot.data
-    );
+    return new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(snapshot.ref), snapshot.data);
   }
 
-  onSnapshot(callback: DocumentSnapshotCallback) {
-    this.stream(
-      ({ changeType, newSnapshot, oldSnapshot }: StreamChanges) => {
-        if (!newSnapshot) return;
-        callback(newSnapshot, { newSnapshot, oldSnapshot, changeType });
-      },
-      { initialValues: true }
-    );
+  async onSnapshot(callback: DocumentSnapshotCallback) {
+    const initialSnapshot = await this.get();
+    callback(initialSnapshot);
+
+    this.stream(({ changeType, newSnapshot, oldSnapshot }: StreamChanges) => {
+      if (!newSnapshot) return;
+      callback(newSnapshot, { newSnapshot, oldSnapshot, changeType });
+    });
   }
 
-  stream(
-    callback: DocumentStreamCallback,
-    { initialValues = false }: StreamOptions
-  ) {
+  stream(callback: DocumentStreamCallback) {
     const app = App.getApp(this.collection.database.app.name);
     const database = app.plugins.database as DatabasePlugin;
-    database.documentStream(this).register(callback, initialValues);
+    database.documentStream(this).register(callback);
   }
 }
 
