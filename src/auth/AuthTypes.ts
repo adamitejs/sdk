@@ -11,3 +11,4 @@ export type AuthUser = {
 };
 
 export type AuthStateChangeCallback = (authState?: AuthUser) => void;
+export type PostRegistrationCallback = (user: AuthUser | undefined) => Promise<void>;

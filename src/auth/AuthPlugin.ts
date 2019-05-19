@@ -2,11 +2,7 @@ import client from "@adamite/relay-client";
 import { EventEmitter } from "events";
 import * as jwt from "jsonwebtoken";
 import App from "../app/App";
-import {
-  AuthServiceToken,
-  AuthStateChangeCallback,
-  AuthUser
-} from "./AuthTypes";
+import { AuthServiceToken, AuthStateChangeCallback, AuthUser, PostRegistrationCallback } from "./AuthTypes";
 import { AdamitePlugin } from "../app";
 
 class AuthPlugin extends EventEmitter implements AdamitePlugin {
@@ -62,11 +58,14 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     };
   }
 
-  async createUser(email: string, password: string) {
+  async createUser(email: string, password: string, postRegistration?: PostRegistrationCallback) {
     const { token } = await this.client.invoke("createUser", {
       email,
       password
     });
+
+    this.currentToken = token;
+    if (postRegistration) await postRegistration(this.currentUser);
 
     this.saveAuthState(token);
     return this.currentUser;
