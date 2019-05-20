@@ -19,6 +19,8 @@ class CollectionStream {
 
   private subscribed: boolean = false;
 
+  private subscriptionId?: string;
+
   /**
    * Initialising a CollectionStream requires providing a DatabasePlugin from which
    * the CollectionStream will communicate to the database service. Further, it requires
@@ -31,7 +33,6 @@ class CollectionStream {
     this.databasePlugin = databasePlugin;
     this.collectionReference = collectionReference;
     this.handlers = [];
-    this.subscribe();
   }
 
   /**
@@ -41,20 +42,41 @@ class CollectionStream {
    */
   register(handler: CollectionStreamCallback) {
     this.handlers.push(handler);
+    this.subscribe();
+  }
+
+  /**
+   * Unregisters a handler.
+   *
+   * @param {Function} handler
+   */
+  unregister(handler: CollectionStreamCallback) {
+    this.handlers = this.handlers.filter(h => h !== handler);
+    if (this.handlers.length === 0) this.unsubscribe();
   }
 
   private async subscribe() {
     if (this.subscribed) return;
 
-    const client = this.databasePlugin.client;
-
-    const { subscription } = await client.invoke("subscribeCollection", {
+    const { subscription } = await this.databasePlugin.client.invoke("subscribeCollection", {
       ref: DatabaseSerializer.serializeCollectionReference(this.collectionReference)
     });
 
-    client.socket.on(subscription.id, this.handleUpdate.bind(this));
+    this.databasePlugin.client.socket.on(subscription.id, this.handleUpdate.bind(this));
 
+    this.subscriptionId = subscription.id;
     this.subscribed = true;
+  }
+
+  private async unsubscribe() {
+    if (!this.subscribed) return;
+
+    await this.databasePlugin.client.invoke("unsubscribe", {
+      subscriptionId: this.subscriptionId
+    });
+
+    this.subscriptionId = undefined;
+    this.subscribed = false;
   }
 
   private handleUpdate(update: StreamChanges) {

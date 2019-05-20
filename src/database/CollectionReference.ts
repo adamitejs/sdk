@@ -76,27 +76,29 @@ class CollectionReference {
     return new CollectionSnapshot(snapshot.ref, snapshot.data);
   }
 
-  async onSnapshot(callback: CollectionSnapshotCallback) {
-    this.snapshot = await this.get();
-    callback(this.snapshot);
+  onSnapshot(callback: CollectionSnapshotCallback) {
+    this.sendInitialSnapshot(callback);
 
-    this.stream(
-      ({ changeType, oldSnapshot, newSnapshot }: StreamChanges) => {
-        // create the in-memory snapshot if needed
-        this.snapshot = this.snapshot || new CollectionSnapshot(this);
+    return this.stream(({ changeType, oldSnapshot, newSnapshot }: StreamChanges) => {
+      // create the in-memory snapshot if needed
+      this.snapshot = this.snapshot || new CollectionSnapshot(this);
 
-        // mutate the in-memory snapshot, and send it in the callback
-        this.snapshot = this.snapshot.mutate(changeType, oldSnapshot, newSnapshot);
-        callback(this.snapshot, { newSnapshot, oldSnapshot, changeType });
-      },
-      { initialValues: true }
-    );
+      // mutate the in-memory snapshot, and send it in the callback
+      this.snapshot = this.snapshot.mutate(changeType, oldSnapshot, newSnapshot);
+      callback(this.snapshot, { newSnapshot, oldSnapshot, changeType });
+    });
   }
 
-  stream(callback: CollectionStreamCallback, { initialValues = false }: StreamOptions) {
+  stream(callback: CollectionStreamCallback) {
     const app = App.getApp(this.database.app.name);
     const database = app.plugins.database as DatabasePlugin;
-    database.collectionStream(this).register(callback, initialValues);
+    database.collectionStream(this).register(callback);
+    return () => database.collectionStream(this).unregister(callback);
+  }
+
+  private async sendInitialSnapshot(callback: CollectionSnapshotCallback) {
+    this.snapshot = await this.get();
+    callback(this.snapshot);
   }
 }
 

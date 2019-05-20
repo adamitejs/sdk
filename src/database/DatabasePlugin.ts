@@ -69,7 +69,7 @@ class DatabasePlugin implements AdamitePlugin {
    *
    * @param {DocumentReference} documentReference
    */
-  documentStream(documentReference: DocumentReference) {
+  documentStream(documentReference: DocumentReference): DocumentStream {
     const hashKey = documentReference.hash;
     var hashValue = this.documentStreamCache[hashKey];
 
@@ -86,7 +86,7 @@ class DatabasePlugin implements AdamitePlugin {
    * Accepts a CollectionReference and returns a CollectionStream allowing for
    * the registration of handlers for updates of the corresponding CollectionSnapshot.
    */
-  collectionStream(collectionReference: CollectionReference) {
+  collectionStream(collectionReference: CollectionReference): CollectionStream {
     const hashKey = collectionReference.name;
     var hashValue = this.collectionStreamCache[hashKey];
 

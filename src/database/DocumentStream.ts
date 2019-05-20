@@ -18,6 +18,8 @@ class DocumentStream {
 
   private subscribed: boolean = false;
 
+  private subscriptionId?: string;
+
   /**
    * Initialising a DocumentStream requires providing a DatabasePlugin from which
    * the DocumentStream will communicate to the database service. Further, it requires
@@ -30,7 +32,6 @@ class DocumentStream {
     this.databasePlugin = databasePlugin;
     this.documentReference = documentReference;
     this.handlers = [];
-    this.subscribe();
   }
 
   /**
@@ -38,22 +39,45 @@ class DocumentStream {
    *
    * @param {Function} handler
    */
-  async register(handler: DocumentStreamCallback) {
-    this.handlers.push(handler);
+  register(handler: DocumentStreamCallback) {
+    this.handlers = [...this.handlers, handler];
+    this.subscribe();
+  }
+
+  /**
+   * Unregisters a handler.
+   *
+   * @param {Function} handler
+   */
+  unregister(handler: DocumentStreamCallback) {
+    this.handlers = this.handlers.filter(h => h !== handler);
+    if (this.handlers.length === 0) this.unsubscribe();
   }
 
   private async subscribe() {
     if (this.subscribed) return;
 
-    const client = this.databasePlugin.client;
-
-    const { subscription } = await client.invoke("subscribeDocument", {
+    const { subscription } = await this.databasePlugin.client.invoke("subscribeDocument", {
       ref: DatabaseSerializer.serializeDocumentReference(this.documentReference)
     });
 
-    client.socket.on(subscription.id, this.handleUpdate.bind(this));
+    this.databasePlugin.client.socket.on(subscription.id, this.handleUpdate.bind(this));
 
+    this.subscriptionId = subscription.id;
     this.subscribed = true;
+  }
+
+  private async unsubscribe() {
+    if (!this.subscribed) return;
+
+    console.log("unsubscribe " + this.subscriptionId);
+
+    await this.databasePlugin.client.invoke("unsubscribe", {
+      subscriptionId: this.subscriptionId
+    });
+
+    this.subscriptionId = undefined;
+    this.subscribed = false;
   }
 
   private handleUpdate(update: StreamChanges) {

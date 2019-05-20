@@ -55,20 +55,25 @@ class DocumentReference {
     return new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(snapshot.ref), snapshot.data);
   }
 
-  async onSnapshot(callback: DocumentSnapshotCallback) {
-    const initialSnapshot = await this.get();
-    callback(initialSnapshot);
+  onSnapshot(callback: DocumentSnapshotCallback) {
+    this.sendInitialSnapshot(callback);
 
-    this.stream(({ changeType, newSnapshot, oldSnapshot }: StreamChanges) => {
+    return this.stream(({ changeType, newSnapshot, oldSnapshot }: StreamChanges) => {
       if (!newSnapshot) return;
       callback(newSnapshot, { newSnapshot, oldSnapshot, changeType });
     });
   }
 
-  stream(callback: DocumentStreamCallback) {
+  stream(callback: DocumentStreamCallback): Function {
     const app = App.getApp(this.collection.database.app.name);
     const database = app.plugins.database as DatabasePlugin;
     database.documentStream(this).register(callback);
+    return () => database.documentStream(this).unregister(callback);
+  }
+
+  private async sendInitialSnapshot(callback: DocumentSnapshotCallback) {
+    const initialSnapshot = await this.get();
+    callback(initialSnapshot);
   }
 }
 
