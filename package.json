@@ -15,7 +15,7 @@
     "dist/**/*"
   ],
   "dependencies": {
-    "@adamite/relay-client": "https://github.com/adamitejs/relay-client.git",
+    "@adamite/relay-client": "latest",
     "@types/jsonwebtoken": "^8.3.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.11"
