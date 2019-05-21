@@ -55,7 +55,7 @@ class DocumentReference {
     return new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(snapshot.ref), snapshot.data);
   }
 
-  onSnapshot(callback: DocumentSnapshotCallback) {
+  onSnapshot(callback: DocumentSnapshotCallback): () => void {
     this.sendInitialSnapshot(callback);
 
     return this.stream(({ changeType, newSnapshot, oldSnapshot }: StreamChanges) => {
@@ -64,11 +64,14 @@ class DocumentReference {
     });
   }
 
-  stream(callback: DocumentStreamCallback): Function {
+  stream(callback: DocumentStreamCallback): () => void {
     const app = App.getApp(this.collection.database.app.name);
     const database = app.plugins.database as DatabasePlugin;
     database.documentStream(this).register(callback);
-    return () => database.documentStream(this).unregister(callback);
+
+    return () => {
+      database.documentStream(this).unregister(callback);
+    };
   }
 
   private async sendInitialSnapshot(callback: DocumentSnapshotCallback) {

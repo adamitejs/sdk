@@ -93,10 +93,13 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     this.clearAuthState();
   }
 
-  onAuthStateChange(callback: AuthStateChangeCallback) {
+  onAuthStateChange(callback: AuthStateChangeCallback): () => void {
     callback(this.currentUser);
     this.on("authStateChange", callback);
-    return () => this.off("authStateChange", callback);
+
+    return () => {
+      this.off("authStateChange", callback);
+    };
   }
 
   private loadAuthState() {

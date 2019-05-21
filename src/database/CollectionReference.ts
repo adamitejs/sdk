@@ -76,7 +76,7 @@ class CollectionReference {
     return new CollectionSnapshot(snapshot.ref, snapshot.data);
   }
 
-  onSnapshot(callback: CollectionSnapshotCallback) {
+  onSnapshot(callback: CollectionSnapshotCallback): () => void {
     this.sendInitialSnapshot(callback);
 
     return this.stream(({ changeType, oldSnapshot, newSnapshot }: StreamChanges) => {
@@ -89,11 +89,14 @@ class CollectionReference {
     });
   }
 
-  stream(callback: CollectionStreamCallback) {
+  stream(callback: CollectionStreamCallback): () => void {
     const app = App.getApp(this.database.app.name);
     const database = app.plugins.database as DatabasePlugin;
     database.collectionStream(this).register(callback);
-    return () => database.collectionStream(this).unregister(callback);
+
+    return () => {
+      database.collectionStream(this).unregister(callback);
+    };
   }
 
   private async sendInitialSnapshot(callback: CollectionSnapshotCallback) {
