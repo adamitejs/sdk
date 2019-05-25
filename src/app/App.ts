@@ -3,6 +3,7 @@ import AppReference from "./AppReference";
 import AdamitePlugin from "./AdamitePlugin";
 import { DatabaseReference } from "../database";
 import { AuthPlugin } from "../auth";
+import { FunctionsPlugin } from "../functions";
 
 class App {
   public ref: AppReference;
@@ -36,9 +37,7 @@ class App {
 
   database(name: string = "default"): DatabaseReference {
     if (!this.plugins.database) {
-      throw new Error(
-        "The database plugin is not enabled on app instance: " + this.ref.name
-      );
+      throw new Error("The database plugin is not enabled on app instance: " + this.ref.name);
     }
 
     return new DatabaseReference(name, this.ref);
@@ -46,12 +45,18 @@ class App {
 
   auth(): AuthPlugin {
     if (!this.plugins.auth) {
-      throw new Error(
-        "The auth plugin is not enabled on app instance: " + this.ref.name
-      );
+      throw new Error("The auth plugin is not enabled on app instance: " + this.ref.name);
     }
 
     return this.plugins.auth as AuthPlugin;
+  }
+
+  functions(): FunctionsPlugin {
+    if (!this.plugins.functions) {
+      throw new Error("The functions plugin is not enabled on app instance: " + this.ref.name);
+    }
+
+    return this.plugins.functions as FunctionsPlugin;
   }
 
   log(plugin: string, message: string) {
@@ -84,8 +89,7 @@ class App {
   static getApp(name: string = "default"): App {
     this.initializeGlobals();
     const _global = global as any;
-    _global.__ADAMITE_APPS__[name] =
-      _global.__ADAMITE_APPS__[name] || new App(new AppReference(name));
+    _global.__ADAMITE_APPS__[name] = _global.__ADAMITE_APPS__[name] || new App(new AppReference(name));
     return _global.__ADAMITE_APPS__[name];
   }
 }

@@ -7,6 +7,7 @@ const adamite = function(name = "default"): App {
 export * from "./src/app";
 export * from "./src/auth";
 export * from "./src/database";
+export * from "./src/functions";
 export * from "./src/serialization";
 
 export default adamite;
