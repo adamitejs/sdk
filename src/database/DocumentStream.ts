@@ -70,8 +70,6 @@ class DocumentStream {
   private async unsubscribe() {
     if (!this.subscribed) return;
 
-    console.log("unsubscribe " + this.subscriptionId);
-
     await this.databasePlugin.client.invoke("unsubscribe", {
       subscriptionId: this.subscriptionId
     });
