@@ -29,7 +29,8 @@ class DatabasePlugin implements AdamitePlugin {
       service: "database",
       url: this.app.config.databaseUrl,
       apiKey: this.app.config.apiKey,
-      jwt: this.app.plugins["auth"] && this.app.auth().currentToken
+      jwt: this.app.plugins["auth"] && this.app.auth().currentToken,
+      secret: this.app.config.secret
     });
 
     if (this.app.plugins["auth"]) {
