@@ -3,7 +3,13 @@ import { DocumentSnapshot } from ".";
 import { App } from "../app";
 import DatabasePlugin from "./DatabasePlugin";
 import { DatabaseSerializer, DatabaseDeserializer } from "../serialization";
-import { DocumentSnapshotCallback, StreamChanges, DocumentStreamCallback, StreamOptions } from "./DatabaseTypes";
+import {
+  DocumentSnapshotCallback,
+  StreamChanges,
+  DocumentStreamCallback,
+  StreamOptions,
+  UpdateOptions
+} from "./DatabaseTypes";
 
 class DocumentReference {
   public id: string;
@@ -32,13 +38,14 @@ class DocumentReference {
     return new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(snapshot.ref), snapshot.data);
   }
 
-  async update(data: any): Promise<DocumentSnapshot> {
+  async update(data: any, options?: UpdateOptions): Promise<DocumentSnapshot> {
     const app = App.getApp(this.collection.database.app.name);
     const { client } = app.plugins.database as DatabasePlugin;
 
     const { snapshot } = await client.invoke("updateDocument", {
       ref: DatabaseSerializer.serializeDocumentReference(this),
-      data
+      data,
+      options
     });
 
     return new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(snapshot.ref), snapshot.data);
