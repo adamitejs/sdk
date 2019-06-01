@@ -10,5 +10,6 @@ export { default as DocumentStream } from "./DocumentStream";
 export { default as DatabaseServerValue } from "./DatabaseServerValue";
 
 export { default as DatabasePlugin } from "./DatabasePlugin";
+export { default as DatabaseAdmin } from "./DatabaseAdmin";
 
 export * from "./DatabaseTypes";

@@ -26,3 +26,7 @@ export type CollectionStreamCallback = (changes: StreamChanges) => void;
 export type DocumentSnapshotCallback = (snapshot: DocumentSnapshot, changes?: StreamChanges) => void;
 
 export type DocumentStreamCallback = (changes: StreamChanges) => void;
+
+export type UpdateOptions = {
+  replace: boolean;
+};

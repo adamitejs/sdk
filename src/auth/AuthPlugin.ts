@@ -26,7 +26,8 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     this.client = client({
       service: "auth",
       url: this.app.config.authUrl,
-      apiKey: this.app.config.apiKey
+      apiKey: this.app.config.apiKey,
+      secret: this.app.config.secret
     });
 
     this.client.on("connect", () => {

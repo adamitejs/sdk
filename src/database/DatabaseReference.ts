@@ -1,5 +1,6 @@
 import AppReference from "../app/AppReference";
 import CollectionReference from "./CollectionReference";
+import DatabaseAdmin from "./DatabaseAdmin";
 
 class DatabaseReference {
   public name: string;
