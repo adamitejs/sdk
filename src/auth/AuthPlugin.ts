@@ -59,11 +59,19 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     };
   }
 
-  async createUser(email: string, password: string, postRegistration?: PostRegistrationCallback) {
+  async createUser(
+    email: string,
+    password: string,
+    postRegistration?: PostRegistrationCallback,
+    bypassLogin?: boolean
+  ) {
     const { token } = await this.client.invoke("createUser", {
       email,
-      password
+      password,
+      bypassLogin
     });
+
+    if (bypassLogin) return token;
 
     this.currentToken = token;
     if (postRegistration) await postRegistration(this.currentUser);
