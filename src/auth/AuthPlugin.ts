@@ -111,6 +111,19 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     };
   }
 
+  private checkForExpiredToken() {
+    if (!this.currentToken) return;
+
+    const decodedToken = jwt.decode(this.currentToken) as AuthServiceToken;
+    if (!decodedToken) return undefined;
+
+    const isTokenExpired = decodedToken.exp < Math.floor(Date.now() / 1000);
+
+    if (isTokenExpired) {
+      this.clearAuthState();
+    }
+  }
+
   private loadAuthState() {
     if (typeof window === "undefined" || !window.localStorage) return;
 
@@ -118,6 +131,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     const localStorageToken = window.localStorage.getItem(tokenKey);
 
     this.currentToken = localStorageToken || undefined;
+    this.checkForExpiredToken();
   }
 
   private saveAuthState(token: string) {
