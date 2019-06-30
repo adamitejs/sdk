@@ -1,6 +1,8 @@
 export type AuthServiceToken = {
   sub: string;
   email: string;
+  exp: number;
+  iat: number;
 } | null;
 
 export type AuthUser = {
