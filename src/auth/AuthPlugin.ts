@@ -115,7 +115,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     if (!this.currentToken) return;
 
     const decodedToken = jwt.decode(this.currentToken) as AuthServiceToken;
-    if (!decodedToken) return undefined;
+    if (!decodedToken) return;
 
     const isTokenExpired = decodedToken.exp < Math.floor(Date.now() / 1000);
 
