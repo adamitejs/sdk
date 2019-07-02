@@ -18,12 +18,14 @@
   "dependencies": {
     "@adamite/relay-client": "latest",
     "@types/jsonwebtoken": "^8.3.2",
-    "jsonwebtoken": "^8.5.1",
+    "events": "^3.0.0",
+    "jwt-decode": "^2.2.0",
     "lodash": "^4.17.11"
   },
   "devDependencies": {
     "@types/core-js": "^2.5.0",
     "@types/jest": "^24.0.12",
+    "@types/jwt-decode": "^2.2.1",
     "@types/lodash": "^4.14.123",
     "@types/node": "^12.0.0",
     "husky": "^2.2.0",

@@ -1,6 +1,6 @@
 import client from "@adamite/relay-client";
 import { EventEmitter } from "events";
-import * as jwt from "jsonwebtoken";
+import * as jwtdecode from "jwt-decode";
 import App from "../app/App";
 import { AuthServiceToken, AuthStateChangeCallback, AuthUser, PostRegistrationCallback } from "./AuthTypes";
 import { AdamitePlugin } from "../app";
@@ -48,7 +48,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   get currentUser(): AuthUser | undefined {
     if (!this.currentToken) return undefined;
 
-    const decodedToken = jwt.decode(this.currentToken) as AuthServiceToken;
+    const decodedToken = jwtdecode(this.currentToken) as AuthServiceToken;
     if (!decodedToken) return undefined;
 
     return {
