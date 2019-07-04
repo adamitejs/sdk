@@ -59,12 +59,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     };
   }
 
-  async createUser(
-    email: string,
-    password: string,
-    postRegistration?: PostRegistrationCallback,
-    bypassLogin?: boolean
-  ) {
+  async createUser(email: string, password: string, postRegistration?: PostRegistrationCallback, bypassLogin?: boolean) {
     const { token } = await this.client.invoke("createUser", {
       email,
       password,
@@ -114,7 +109,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   private checkForExpiredToken() {
     if (!this.currentToken) return;
 
-    const decodedToken = jwt.decode(this.currentToken) as AuthServiceToken;
+    const decodedToken = jwtdecode(this.currentToken) as AuthServiceToken;
     if (!decodedToken) return;
 
     const isTokenExpired = decodedToken.exp < Math.floor(Date.now() / 1000);
