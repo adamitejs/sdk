@@ -18,6 +18,7 @@
   "dependencies": {
     "@adamite/relay-client": "latest",
     "@types/jsonwebtoken": "^8.3.2",
+    "buffer": "^5.4.3",
     "events": "^3.0.0",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.11"
