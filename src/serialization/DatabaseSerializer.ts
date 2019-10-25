@@ -2,16 +2,10 @@ import DatabaseReference from "../database/DatabaseReference";
 import AppSerializer from "./AppSerializer";
 import CollectionReference from "../database/CollectionReference";
 import DocumentReference from "../database/DocumentReference";
-import {
-  SerializedDatabaseRef,
-  SerializedCollectionRef,
-  SerializedDocumentRef
-} from "./SerializationTypes";
+import { SerializedDatabaseRef, SerializedCollectionRef, SerializedDocumentRef } from "./SerializationTypes";
 
 class DatabaseSerializer {
-  static serializeDatabaseReference(
-    databaseRef: DatabaseReference
-  ): SerializedDatabaseRef {
+  static serializeDatabaseReference(databaseRef: DatabaseReference): SerializedDatabaseRef {
     return {
       type: "DatabaseReference",
       name: databaseRef.name,
@@ -19,28 +13,28 @@ class DatabaseSerializer {
     };
   }
 
-  static serializeCollectionReference(
-    collectionRef: CollectionReference
-  ): SerializedCollectionRef {
+  static serializeCollectionReference(collectionRef: CollectionReference): SerializedCollectionRef {
     return {
       type: "CollectionReference",
       name: collectionRef.name,
       query: collectionRef.query,
-      database: DatabaseSerializer.serializeDatabaseReference(
-        collectionRef.database
-      )
+      joins: collectionRef.joins.map(join => ({
+        field: join.field,
+        collectionRef: this.serializeCollectionReference(join.collectionRef)
+      })),
+      database: DatabaseSerializer.serializeDatabaseReference(collectionRef.database)
     };
   }
 
-  static serializeDocumentReference(
-    documentRef: DocumentReference
-  ): SerializedDocumentRef {
+  static serializeDocumentReference(documentRef: DocumentReference): SerializedDocumentRef {
     return {
       type: "DocumentReference",
       id: documentRef.id,
-      collection: DatabaseSerializer.serializeCollectionReference(
-        documentRef.collection
-      )
+      collection: DatabaseSerializer.serializeCollectionReference(documentRef.collection),
+      joins: documentRef.joins.map(join => ({
+        field: join.field,
+        collectionRef: this.serializeCollectionReference(join.collectionRef)
+      }))
     };
   }
 }

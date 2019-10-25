@@ -1,5 +1,6 @@
 import CollectionSnapshot from "./CollectionSnapshot";
 import DocumentSnapshot from "./DocumentSnapshot";
+import CollectionReference from "./CollectionReference";
 
 export type CollectionOrderByRule = string[];
 
@@ -29,4 +30,9 @@ export type DocumentStreamCallback = (changes: StreamChanges) => void;
 
 export type UpdateOptions = {
   replace: boolean;
+};
+
+export type Join = {
+  field: string;
+  collectionRef: CollectionReference;
 };

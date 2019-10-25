@@ -1,13 +1,7 @@
 import qs from "querystring";
 import DocumentReference from "./DocumentReference";
 import DatabaseReference from "./DatabaseReference";
-import {
-  CollectionQuery,
-  CollectionSnapshotCallback,
-  StreamChanges,
-  CollectionStreamCallback,
-  StreamOptions
-} from "./DatabaseTypes";
+import { CollectionQuery, CollectionSnapshotCallback, StreamChanges, CollectionStreamCallback, Join } from "./DatabaseTypes";
 import CollectionSnapshot from "./CollectionSnapshot";
 import { DocumentSnapshot, DatabasePlugin } from ".";
 import { DatabaseSerializer, DatabaseDeserializer } from "../serialization";
@@ -19,6 +13,8 @@ class CollectionReference {
   public database: DatabaseReference;
 
   public query: CollectionQuery;
+
+  public joins: Join[] = [];
 
   private snapshot: CollectionSnapshot | undefined;
 
@@ -50,6 +46,11 @@ class CollectionReference {
 
   where(field: string, operator: string, value: string) {
     this.query.where.push([field, operator, value]);
+    return this;
+  }
+
+  join(field: string, collectionRef: CollectionReference) {
+    this.joins.push({ field, collectionRef });
     return this;
   }
 

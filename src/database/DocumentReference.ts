@@ -3,18 +3,14 @@ import { DocumentSnapshot } from ".";
 import { App } from "../app";
 import DatabasePlugin from "./DatabasePlugin";
 import { DatabaseSerializer, DatabaseDeserializer } from "../serialization";
-import {
-  DocumentSnapshotCallback,
-  StreamChanges,
-  DocumentStreamCallback,
-  StreamOptions,
-  UpdateOptions
-} from "./DatabaseTypes";
+import { DocumentSnapshotCallback, StreamChanges, DocumentStreamCallback, UpdateOptions, Join } from "./DatabaseTypes";
 
 class DocumentReference {
   public id: string;
 
   public collection: CollectionReference;
+
+  public joins: Join[] = [];
 
   constructor(id: string, collection: CollectionReference) {
     this.id = id;
@@ -60,6 +56,11 @@ class DocumentReference {
     });
 
     return new DocumentSnapshot(DatabaseDeserializer.deserializeDocumentReference(snapshot.ref), snapshot.data);
+  }
+
+  join(field: string, collectionRef: CollectionReference) {
+    this.joins.push({ field, collectionRef });
+    return this;
   }
 
   onSnapshot(callback: DocumentSnapshotCallback): () => void {
