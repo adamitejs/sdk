@@ -3,13 +3,8 @@ import { DocumentSnapshot } from ".";
 import { App } from "../app";
 import DatabasePlugin from "./DatabasePlugin";
 import { DatabaseSerializer, DatabaseDeserializer } from "../serialization";
-import {
-  DocumentSnapshotCallback,
-  StreamChanges,
-  DocumentStreamCallback,
-  StreamOptions,
-  UpdateOptions
-} from "./DatabaseTypes";
+import { DocumentSnapshotCallback, StreamChanges, DocumentStreamCallback, UpdateOptions } from "./DatabaseTypes";
+import { Buffer } from "buffer";
 
 class DocumentReference {
   public id: string;

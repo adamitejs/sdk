@@ -1,17 +1,11 @@
-import qs from "querystring";
 import DocumentReference from "./DocumentReference";
 import DatabaseReference from "./DatabaseReference";
-import {
-  CollectionQuery,
-  CollectionSnapshotCallback,
-  StreamChanges,
-  CollectionStreamCallback,
-  StreamOptions
-} from "./DatabaseTypes";
+import { CollectionQuery, CollectionSnapshotCallback, StreamChanges, CollectionStreamCallback } from "./DatabaseTypes";
 import CollectionSnapshot from "./CollectionSnapshot";
 import { DocumentSnapshot, DatabasePlugin } from ".";
 import { DatabaseSerializer, DatabaseDeserializer } from "../serialization";
 import { App } from "../app";
+import { Buffer } from "buffer";
 
 class CollectionReference {
   public name: string;
