@@ -1,6 +1,12 @@
 import DocumentReference from "./DocumentReference";
 import DatabaseReference from "./DatabaseReference";
-import { CollectionQuery, CollectionSnapshotCallback, StreamChanges, CollectionStreamCallback } from "./DatabaseTypes";
+import {
+  CollectionQuery,
+  CollectionSnapshotCallback,
+  StreamChanges,
+  CollectionStreamCallback,
+  CollectionWhereComparision
+} from "./DatabaseTypes";
 import CollectionSnapshot from "./CollectionSnapshot";
 import { DocumentSnapshot, DatabasePlugin } from ".";
 import { DatabaseSerializer, DatabaseDeserializer } from "../serialization";
@@ -42,7 +48,7 @@ class CollectionReference {
     return this;
   }
 
-  where(field: string, operator: string, value: string) {
+  where(field: string, operator: CollectionWhereComparision, value: any) {
     this.query.where.push([field, operator, value]);
     return this;
   }

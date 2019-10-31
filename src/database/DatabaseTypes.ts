@@ -3,7 +3,9 @@ import DocumentSnapshot from "./DocumentSnapshot";
 
 export type CollectionOrderByRule = string[];
 
-export type CollectionWhereRule = string[];
+export type CollectionWhereComparision = "==" | "!=" | ">" | "<" | ">=" | "<=" | "array-contains" | "array-not-contains";
+
+export type CollectionWhereRule = [string, CollectionWhereComparision, any];
 
 export type CollectionQuery = {
   limit: number;
