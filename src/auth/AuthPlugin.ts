@@ -4,6 +4,8 @@ import * as jwtdecode from "jwt-decode";
 import App from "../app/App";
 import { AuthServiceToken, AuthStateChangeCallback, AuthUser, PostRegistrationCallback } from "./AuthTypes";
 import { AdamitePlugin } from "../app";
+import StorageProvider from "./StorageProvider";
+import LocalStorageProvider from "./LocalStorageProvider";
 
 class AuthPlugin extends EventEmitter implements AdamitePlugin {
   public app: App;
@@ -12,10 +14,13 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
 
   public currentToken: string | undefined;
 
+  private storageProvider: StorageProvider;
+
   constructor(app: App) {
     super();
     this.app = app;
-    this.loadAuthState();
+    this.storageProvider = new LocalStorageProvider();
+    this.loadInitialAuthState();
   }
 
   getPluginName() {
@@ -45,6 +50,11 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     });
   }
 
+  useProvider(provider: StorageProvider) {
+    this.storageProvider = provider;
+    this.loadInitialAuthState();
+  }
+
   get currentUser(): AuthUser | undefined {
     if (!this.currentToken) return undefined;
 
@@ -71,7 +81,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     this.currentToken = token;
     if (postRegistration) await postRegistration(this.currentUser);
 
-    this.saveAuthState(token);
+    await this.saveAuthState(token);
     return this.currentUser;
   }
 
@@ -81,7 +91,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
       password
     });
 
-    this.saveAuthState(token);
+    await this.saveAuthState(token);
     return this.currentUser;
   }
 
@@ -93,8 +103,8 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     return data;
   }
 
-  logout() {
-    this.clearAuthState();
+  async logout() {
+    await this.clearAuthState();
   }
 
   onAuthStateChange(callback: AuthStateChangeCallback): () => void {
@@ -104,6 +114,11 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     return () => {
       this.off("authStateChange", callback);
     };
+  }
+
+  private async loadInitialAuthState() {
+    await this.loadAuthState();
+    this.emit("authStateChange", this.currentUser);
   }
 
   private checkForExpiredToken() {
@@ -119,29 +134,22 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     }
   }
 
-  private loadAuthState() {
-    if (typeof window === "undefined" || !window.localStorage) return;
-
-    const tokenKey = `adamite:auth:${this.app.ref.name}.token`;
-    const localStorageToken = window.localStorage.getItem(tokenKey);
-
-    this.currentToken = localStorageToken || undefined;
+  private async loadAuthState() {
+    const token = await this.storageProvider.getToken(this.app.ref.name);
+    this.currentToken = token || undefined;
     this.checkForExpiredToken();
   }
 
-  private saveAuthState(token: string) {
+  private async saveAuthState(token: string) {
     this.currentToken = token;
     this.emit("authStateChange", this.currentUser);
-    if (typeof window === "undefined" || !window.localStorage) return;
-    const tokenKey = `adamite:auth:${this.app.ref.name}.token`;
-    window.localStorage.setItem(tokenKey, token);
+    await this.storageProvider.saveToken(this.app.ref.name, token);
   }
 
-  private clearAuthState() {
+  private async clearAuthState() {
     this.currentToken = undefined;
     this.emit("authStateChange", this.currentUser);
-    if (typeof window === "undefined" || !window.localStorage) return;
-    window.localStorage.removeItem(`adamite:auth:${this.app.ref.name}.token`);
+    await this.storageProvider.clearToken(this.app.ref.name);
   }
 }
 
