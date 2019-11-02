@@ -1,7 +1,7 @@
 import { merge } from "lodash";
 import AppReference from "./AppReference";
 import AdamitePlugin from "./AdamitePlugin";
-import { DatabaseReference } from "../database";
+import { DatabasePlugin } from "../database";
 import { AuthPlugin } from "../auth";
 import { FunctionsPlugin } from "../functions";
 
@@ -35,12 +35,12 @@ class App {
     return this.plugins[name];
   }
 
-  database(name: string = "default"): DatabaseReference {
+  database(): DatabasePlugin {
     if (!this.plugins.database) {
       throw new Error("The database plugin is not enabled on app instance: " + this.ref.name);
     }
 
-    return new DatabaseReference(name, this.ref);
+    return this.plugins.database as DatabasePlugin;
   }
 
   auth(): AuthPlugin {

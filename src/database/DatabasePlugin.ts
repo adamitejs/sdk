@@ -109,8 +109,12 @@ class DatabasePlugin implements AdamitePlugin {
     return `${this.app.config.databaseUrl}?${qs}`;
   }
 
-  database(name = "default") {
+  database(name = "default"): DatabaseReference {
     return new DatabaseReference(name, this.app.ref);
+  }
+
+  collection(name: string): CollectionReference {
+    return this.database().collection(name);
   }
 }
 
