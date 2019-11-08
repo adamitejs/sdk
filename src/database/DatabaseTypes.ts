@@ -3,7 +3,17 @@ import DocumentSnapshot from "./DocumentSnapshot";
 
 export type CollectionOrderByRule = string[];
 
-export type CollectionWhereComparision = "==" | "!=" | ">" | "<" | ">=" | "<=" | "array-contains" | "array-not-contains";
+export type CollectionWhereComparision =
+  | "=="
+  | "!="
+  | ">"
+  | "<"
+  | ">="
+  | "<="
+  | "array-contains"
+  | "array-not-contains"
+  | "matches"
+  | "not-matches";
 
 export type CollectionWhereRule = [string, CollectionWhereComparision, any];
 
