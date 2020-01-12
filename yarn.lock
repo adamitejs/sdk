@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@adamite/relay-client@latest":
-  version "0.1.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@adamite/relay-client/-/relay-client-0.1.0-beta.0.tgz#797268b936d5451fab901519ee52afc28fadf5bd"
-  integrity sha512-BcgwdRo3t9Zplgql/zosBSLOPbE9z/VWimei0+37Kaim7vJ2FQitU7kFhCwE2tUboxyH64Z4DsEPC3aOmq04OQ==
+"@adamite/relay-client@^0.1.0-beta.1":
+  version "0.1.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@adamite/relay-client/-/relay-client-0.1.0-beta.1.tgz#a0526c71f49e21af59117f1735d9a3b6ee56c9c2"
+  integrity sha512-mczq4rQezJTN8DlG8V5k7RSJqL4Bn0iRcWRC9nhk1AnNiSgK/BkCMC0ucxN4BFlrUVsDI20Tf4wG199es/ZbyA==
   dependencies:
     querystring "^0.2.0"
     socket.io-client "^2.2.0"

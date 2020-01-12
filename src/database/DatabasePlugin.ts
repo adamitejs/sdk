@@ -12,11 +12,13 @@ import RelayClient from "@adamite/relay-client/dist/RelayClient";
 class DatabasePlugin implements AdamitePlugin {
   public app: App;
 
-  public client: any;
+  public client?: RelayClient;
 
   private documentStreamCache: any;
 
   private collectionStreamCache: any;
+
+  private unsubscribeFromAuthStateChanges?: any;
 
   constructor(app: App) {
     this.app = app;
@@ -34,7 +36,7 @@ class DatabasePlugin implements AdamitePlugin {
     });
 
     if (this.app.plugins["auth"]) {
-      this.app.auth().onAuthStateChange(authState => {
+      this.unsubscribeFromAuthStateChanges = this.app.auth().onAuthStateChange(authState => {
         if (!this.client) return;
 
         if (authState) {
@@ -58,6 +60,16 @@ class DatabasePlugin implements AdamitePlugin {
       this.app.log("database", "error");
       console.log(r);
     });
+  }
+
+  disconnect() {
+    if (this.unsubscribeFromAuthStateChanges) {
+      this.unsubscribeFromAuthStateChanges();
+    }
+
+    if (this.client) {
+      this.client.disconnect();
+    }
   }
 
   getPluginName(): string {

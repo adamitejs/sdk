@@ -50,6 +50,10 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     });
   }
 
+  disconnect() {
+    this.client.disconnect();
+  }
+
   useProvider(provider: StorageProvider) {
     this.storageProvider = provider;
     this.loadInitialAuthState();

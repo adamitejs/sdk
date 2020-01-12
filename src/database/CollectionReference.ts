@@ -57,6 +57,10 @@ class CollectionReference {
     const app = App.getApp(this.database.app.name);
     const { client } = app.plugins.database as DatabasePlugin;
 
+    if (!client) {
+      throw new Error("The database plugin is not enabled on app instance: " + app.ref.name);
+    }
+
     const { snapshot } = await client.invoke("createDocument", {
       ref: DatabaseSerializer.serializeCollectionReference(this),
       data
@@ -68,6 +72,10 @@ class CollectionReference {
   async get(): Promise<CollectionSnapshot> {
     const app = App.getApp(this.database.app.name);
     const { client } = app.plugins.database as DatabasePlugin;
+
+    if (!client) {
+      throw new Error("The database plugin is not enabled on app instance: " + app.ref.name);
+    }
 
     const { snapshot } = await client.invoke("readCollection", {
       ref: DatabaseSerializer.serializeCollectionReference(this)
