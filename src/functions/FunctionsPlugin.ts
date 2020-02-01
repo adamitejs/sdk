@@ -68,12 +68,12 @@ class FunctionsPlugin implements AdamitePlugin {
   async invoke(functionName: string, args: any | undefined) {
     if (!this.client) return;
 
-    const { returnValue } = (await this.client.invoke("invoke", {
+    const invocation = (await this.client.invoke("invoke", {
       name: functionName,
       args
     })) as FunctionInvocation;
 
-    return returnValue;
+    return invocation?.returnValue;
   }
 }
 

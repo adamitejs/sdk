@@ -11,11 +11,17 @@ class LocalStorageProvider implements StorageProvider {
   }
 
   async saveToken(appName: string, token: string): Promise<void> {
-    throw new Error("Method not implemented.");
+    if (typeof window === "undefined" || !window.localStorage) return;
+
+    const tokenKey = `adamite:auth:${appName}.token`;
+    window.localStorage.setItem(tokenKey, token);
   }
 
   async clearToken(appName: string): Promise<void> {
-    throw new Error("Method not implemented.");
+    if (typeof window === "undefined" || !window.localStorage) return;
+
+    const tokenKey = `adamite:auth:${appName}.token`;
+    window.localStorage.removeItem(tokenKey);
   }
 }
 
