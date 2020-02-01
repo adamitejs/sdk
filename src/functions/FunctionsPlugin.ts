@@ -1,8 +1,7 @@
 import querystring from "querystring";
-import client from "@adamite/relay-client";
 import App from "../app/App";
 import { AdamitePlugin } from "../app";
-import RelayClient from "@adamite/relay-client/dist/RelayClient";
+import RelayClient from "@adamite/relay-client";
 import { FunctionInvocation } from "./FunctionsTypes";
 
 class FunctionsPlugin implements AdamitePlugin {
@@ -17,11 +16,12 @@ class FunctionsPlugin implements AdamitePlugin {
   }
 
   initialize(): void {
-    this.client = client({
+    this.client = new RelayClient({
       service: "functions",
-      url: this.app.config.functionsUrl,
+      url: this.app.getServiceUrl("functions"),
       apiKey: this.app.config.apiKey,
-      jwt: this.app.plugins["auth"] && this.app.auth().currentToken
+      jwt: this.app.plugins["auth"] && this.app.auth().currentToken,
+      secret: this.app.config.secret
     });
 
     if (this.app.plugins["auth"]) {
@@ -74,15 +74,6 @@ class FunctionsPlugin implements AdamitePlugin {
     })) as FunctionInvocation;
 
     return returnValue;
-  }
-
-  get url() {
-    const qs = querystring.stringify({
-      key: this.app.config.apiKey,
-      ...(this.app.config.queryString || {})
-    });
-
-    return `${this.app.config.databaseUrl}?${qs}`;
   }
 }
 

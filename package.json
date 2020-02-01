@@ -36,14 +36,9 @@
     "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.1",
     "tsc-watch": "^2.1.2",
-    "typescript": "^3.4.5",
+    "typescript": "^3.7.5",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
   },
   "jest": {
     "transform": {

@@ -1,5 +1,4 @@
 import querystring from "querystring";
-import client from "@adamite/relay-client";
 import DatabaseReference from "./DatabaseReference";
 import DocumentStream from "./DocumentStream";
 import CollectionStream from "./CollectionStream";
@@ -7,7 +6,7 @@ import App from "../app/App";
 import DocumentReference from "./DocumentReference";
 import CollectionReference from "./CollectionReference";
 import { AdamitePlugin } from "../app";
-import RelayClient from "@adamite/relay-client/dist/RelayClient";
+import RelayClient from "@adamite/relay-client";
 
 class DatabasePlugin implements AdamitePlugin {
   public app: App;
@@ -27,9 +26,9 @@ class DatabasePlugin implements AdamitePlugin {
   }
 
   initialize(): void {
-    this.client = client({
+    this.client = new RelayClient({
       service: "database",
-      url: this.app.config.databaseUrl,
+      url: this.app.getServiceUrl("database"),
       apiKey: this.app.config.apiKey,
       jwt: this.app.plugins["auth"] && this.app.auth().currentToken,
       secret: this.app.config.secret
@@ -110,15 +109,6 @@ class DatabasePlugin implements AdamitePlugin {
     } else {
       return hashValue;
     }
-  }
-
-  get url() {
-    const qs = querystring.stringify({
-      key: this.app.config.apiKey,
-      ...(this.app.config.queryString || {})
-    });
-
-    return `${this.app.config.databaseUrl}?${qs}`;
   }
 
   database(name = "default"): DatabaseReference {

@@ -1,4 +1,3 @@
-import client from "@adamite/relay-client";
 import { EventEmitter } from "events";
 import * as jwtdecode from "jwt-decode";
 import App from "../app/App";
@@ -6,11 +5,12 @@ import { AuthServiceToken, AuthStateChangeCallback, AuthUser, PostRegistrationCa
 import { AdamitePlugin } from "../app";
 import StorageProvider from "./StorageProvider";
 import LocalStorageProvider from "./LocalStorageProvider";
+import RelayClient from "@adamite/relay-client";
 
 class AuthPlugin extends EventEmitter implements AdamitePlugin {
   public app: App;
 
-  public client: any;
+  public client?: RelayClient;
 
   public currentToken: string | undefined;
 
@@ -28,9 +28,9 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 
   initialize() {
-    this.client = client({
+    this.client = new RelayClient({
       service: "auth",
-      url: this.app.config.authUrl,
+      url: this.app.getServiceUrl("auth"),
       apiKey: this.app.config.apiKey,
       secret: this.app.config.secret
     });
@@ -51,7 +51,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 
   disconnect() {
-    this.client.disconnect();
+    this.client?.disconnect();
   }
 
   useProvider(provider: StorageProvider) {
@@ -74,7 +74,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 
   async createUser(email: string, password: string, postRegistration?: PostRegistrationCallback, bypassLogin?: boolean) {
-    const { token } = await this.client.invoke("createUser", {
+    const { token } = await this.client?.invoke("createUser", {
       email,
       password,
       bypassLogin
@@ -90,7 +90,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 
   async loginWithEmailAndPassword(email: string, password: string) {
-    const { token } = await this.client.invoke("loginWithEmailAndPassword", {
+    const { token } = await this.client?.invoke("loginWithEmailAndPassword", {
       email,
       password
     });
@@ -100,7 +100,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 
   async validateToken(token: string) {
-    const { data } = await this.client.invoke("validateToken", {
+    const { data } = await this.client?.invoke("validateToken", {
       token
     });
 
