@@ -100,7 +100,7 @@ class DatabasePlugin implements AdamitePlugin {
    * the registration of handlers for updates of the corresponding CollectionSnapshot.
    */
   collectionStream(collectionReference: CollectionReference): CollectionStream {
-    const hashKey = collectionReference.name;
+    const hashKey = collectionReference.hash;
     var hashValue = this.collectionStreamCache[hashKey];
 
     if (hashValue == undefined) {
