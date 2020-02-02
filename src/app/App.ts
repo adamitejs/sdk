@@ -4,18 +4,19 @@ import AdamitePlugin from "./AdamitePlugin";
 import { DatabasePlugin } from "../database";
 import { AuthPlugin } from "../auth";
 import { FunctionsPlugin } from "../functions";
+import { FullAdamiteConfig, AdamiteConfig } from "./AppTypes";
 
 class App {
   public ref: AppReference;
 
   public plugins: { [name: string]: AdamitePlugin };
 
-  public config: { [key: string]: any };
+  public config: FullAdamiteConfig;
 
   constructor(ref: AppReference) {
     this.ref = ref;
     this.plugins = {};
-    this.config = { logLevel: 0 };
+    this.config = { serviceUrls: {}, apiKey: "", logLevel: 0 };
   }
 
   use(plugin: { new (app: App): AdamitePlugin }) {
@@ -25,7 +26,7 @@ class App {
     return this;
   }
 
-  initializeApp(config: any) {
+  initializeApp(config: AdamiteConfig) {
     this.config = merge(this.config, config);
     this.initializePlugins();
     return this;
@@ -76,6 +77,16 @@ class App {
   error(plugin: string, message: string) {
     if (this.config.logLevel < 2) return;
     console.error(`⚡ [${this.ref.name}.${plugin}]\t${message}`);
+  }
+
+  getServiceUrl(serviceName: string) {
+    const serviceUrl = this.config.serviceUrls[serviceName] || this.config.url;
+
+    if (!serviceUrl) {
+      throw new Error(`Service URL is not defined for ${serviceName}`);
+    }
+
+    return serviceUrl;
   }
 
   private initializePlugins() {
