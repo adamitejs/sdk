@@ -2,12 +2,13 @@
 # yarn lockfile v1
 
 
-"@adamite/relay-client@^1.0.0-beta.0":
-  version "1.0.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@adamite/relay-client/-/relay-client-1.0.0-beta.0.tgz#09fab91209a0b2d94af315f557910c5830a1302b"
-  integrity sha512-VpWsulUdplcb65xaQBvIho69vfFsA60JLyvDk5Bi7JU/9KZc0vJ88fnF++/WOT2gmN6LvQaS7abWMzFL0qDGzQ==
+"@adamite/relay-client@^1.0.0-beta.1":
+  version "1.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@adamite/relay-client/-/relay-client-1.0.0-beta.1.tgz#b87b888d68f282dbdfc1b9683a4621c884e497a2"
+  integrity sha512-cHR9bJjOmPV3I6Nkt4BO1nJ8feW1+heWF98f38sPAjIcN2JWjqYag2G74VKHRkifM89ODYhh7OEeYzV2T0D7sw==
   dependencies:
-    querystring "^0.2.0"
+    eventemitter3 "^4.0.0"
+    query-string "^6.12.1"
     socket.io-client "^2.2.0"
     uws "10.148.1"
 
@@ -4303,7 +4304,7 @@ querystring-es3@^0.2.0:
   resolved "https://registry.yarnpkg.com/querystring-es3/-/querystring-es3-0.2.1.tgz#9ec61f79049875707d69414596fd907a4d711e73"
   integrity sha1-nsYfeQSYdXB9aUFFlv2Qek1xHnM=
 
-querystring@0.2.0, querystring@^0.2.0:
+querystring@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/querystring/-/querystring-0.2.0.tgz#b209849203bb25df820da756e747005878521620"
   integrity sha1-sgmEkgO7Jd+CDadW50cAWHhSFiA=
