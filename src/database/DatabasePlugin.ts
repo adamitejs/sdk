@@ -1,4 +1,3 @@
-import querystring from "querystring";
 import DatabaseReference from "./DatabaseReference";
 import DocumentStream from "./DocumentStream";
 import CollectionStream from "./CollectionStream";

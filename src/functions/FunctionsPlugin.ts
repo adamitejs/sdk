@@ -1,8 +1,6 @@
-import querystring from "querystring";
 import App from "../app/App";
 import { AdamitePlugin } from "../app";
 import RelayClient from "@adamite/relay-client";
-import { FunctionInvocation } from "./FunctionsTypes";
 
 class FunctionsPlugin implements AdamitePlugin {
   public app: App;
