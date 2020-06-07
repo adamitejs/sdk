@@ -16,6 +16,8 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
 
   private storageProvider: StorageProvider;
 
+  private unsubscribeFromAuthStateChanges?: any;
+
   constructor(app: App) {
     super();
     this.app = app;
@@ -48,10 +50,24 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
       this.app.log("auth", "error");
       console.log(r);
     });
+
+    this.unsubscribeFromAuthStateChanges = this.onAuthStateChange(authState => {
+      if (!this.client) return;
+
+      if (authState) {
+        this.client.updateJwt(authState.token);
+      } else {
+        this.client.updateJwt(undefined);
+      }
+    });
   }
 
   disconnect() {
     this.client?.disconnect();
+    
+    if (this.unsubscribeFromAuthStateChanges) {
+      this.unsubscribeFromAuthStateChanges();
+    }
   }
 
   useProvider(provider: StorageProvider) {
@@ -97,6 +113,35 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
 
     await this.saveAuthState(token);
     return this.currentUser;
+  }
+
+  async changePassword(oldPassword: string, newPassword: string) {
+    if (!this.currentToken) {
+      throw new Error("Can't change password because the user is not logged in.");
+    }
+
+    const { token } = await this.client?.invoke("changePassword", {
+      oldPassword,
+      newPassword
+    });
+
+    
+    await this.saveAuthState(token);
+    this.emit("authStateChange", this.currentUser);
+  }
+
+  async changeEmail(password: string, email: string) {
+    if (!this.currentToken) {
+      throw new Error("Can't change email because the user is not logged in.");
+    }
+
+    const { token } = await this.client?.invoke("changeEmail", {
+      password,
+      email
+    });
+
+    await this.saveAuthState(token);
+    this.emit("authStateChange", this.currentUser);
   }
 
   async validateToken(token: string) {
