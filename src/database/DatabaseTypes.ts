@@ -24,9 +24,9 @@ export type CollectionQuery = {
 };
 
 export type StreamChanges = {
-  changeType: string;
-  oldSnapshot: DocumentSnapshot | undefined;
-  newSnapshot: DocumentSnapshot | undefined;
+  changeType: "create" | "update" | "delete";
+  oldSnapshot?: DocumentSnapshot;
+  newSnapshot?: DocumentSnapshot;
 };
 
 export type StreamOptions = { initialValues: boolean };

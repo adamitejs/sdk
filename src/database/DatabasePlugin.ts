@@ -5,69 +5,40 @@ import App from "../app/App";
 import DocumentReference from "./DocumentReference";
 import CollectionReference from "./CollectionReference";
 import { AdamitePlugin } from "../app";
-import RelayClient from "@adamite/relay-client";
 
-class DatabasePlugin implements AdamitePlugin {
-  public app: App;
-
-  public client?: RelayClient;
-
-  private documentStreamCache: any;
-
-  private collectionStreamCache: any;
-
-  private unsubscribeFromAuthStateChanges?: any;
+class DatabasePlugin extends AdamitePlugin {
+  private documentStreamCache: { [key: string]: DocumentStream };
+  private collectionStreamCache: { [key: string]: CollectionStream };
 
   constructor(app: App) {
-    this.app = app;
+    super(app);
     this.documentStreamCache = {};
     this.collectionStreamCache = {};
   }
 
   initialize(): void {
-    this.client = new RelayClient({
-      service: "database",
-      url: this.app.getServiceUrl("database"),
-      apiKey: this.app.config.apiKey,
-      jwt: this.app.plugins["auth"] && this.app.auth().currentToken,
-      secret: this.app.config.secret
-    });
+    super.initialize();
 
-    if (this.app.plugins["auth"]) {
-      this.unsubscribeFromAuthStateChanges = this.app.auth().onAuthStateChange(authState => {
-        if (!this.client) return;
-
-        if (authState) {
-          this.client.updateJwt(authState.token);
-        } else {
-          this.client.updateJwt(undefined);
-        }
+    this.client!.on("connect", () => {
+      Object.values(this.documentStreamCache).forEach(stream => {
+        stream.subscribe();
+        stream.rehydrate();
       });
-    }
-
-    this.client.on("connect", () => {
-      this.app.log("database", "connected");
+      Object.values(this.collectionStreamCache).forEach(stream => {
+        stream.subscribe();
+        stream.rehydrate();
+      });
     });
 
-    this.client.on("disconnect", (r: any) => {
-      this.app.log("database", "disconnected");
-      console.log(r);
+    this.client!.on("error", () => {
+      Object.values(this.documentStreamCache).forEach(stream => stream.unsubscribe());
+      Object.values(this.collectionStreamCache).forEach(stream => stream.unsubscribe());
     });
 
-    this.client.on("error", (r: any) => {
-      this.app.log("database", "error");
-      console.log(r);
+    this.client!.on("disconnect", () => {
+      Object.values(this.documentStreamCache).forEach(stream => stream.unsubscribe());
+      Object.values(this.collectionStreamCache).forEach(stream => stream.unsubscribe());
     });
-  }
-
-  disconnect() {
-    if (this.unsubscribeFromAuthStateChanges) {
-      this.unsubscribeFromAuthStateChanges();
-    }
-
-    if (this.client) {
-      this.client.disconnect();
-    }
   }
 
   getPluginName(): string {

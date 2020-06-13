@@ -18,7 +18,17 @@ export {
   DocumentStream,
   DatabaseServerValue,
   DatabasePlugin,
-  DatabaseAdmin
+  DatabaseAdmin,
+  CollectionOrderByRule,
+  CollectionWhereRule,
+  CollectionQuery,
+  StreamChanges,
+  StreamOptions,
+  CollectionSnapshotCallback,
+  CollectionStreamCallback,
+  DocumentSnapshotCallback,
+  DocumentStreamCallback,
+  UpdateOptions
 } from "./src/database";
 
 export { FunctionsPlugin } from "./src/functions";

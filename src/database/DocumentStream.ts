@@ -54,12 +54,14 @@ class DocumentStream {
     if (this.handlers.length === 0) this.unsubscribe();
   }
 
-  private async subscribe() {
+  async subscribe() {
     if (this.subscribed) return;
 
     if (!this.databasePlugin.client) {
       throw new Error("The database plugin is not enabled on app instance: " + this.databasePlugin.app.ref.name);
     }
+
+    this.subscribed = true;
 
     const { subscription } = await this.databasePlugin.client.invoke("subscribeDocument", {
       ref: DatabaseSerializer.serializeDocumentReference(this.documentReference)
@@ -68,22 +70,30 @@ class DocumentStream {
     this.databasePlugin.client.socket.on(subscription.id, this.handleUpdate.bind(this));
 
     this.subscriptionId = subscription.id;
-    this.subscribed = true;
   }
 
-  private async unsubscribe() {
+  async unsubscribe() {
     if (!this.subscribed) return;
 
     if (!this.databasePlugin.client) {
       throw new Error("The database plugin is not enabled on app instance: " + this.databasePlugin.app.ref.name);
     }
 
-    await this.databasePlugin.client.invoke("unsubscribe", {
+    this.databasePlugin.client.invoke("unsubscribe", {
       subscriptionId: this.subscriptionId
     });
 
     this.subscriptionId = undefined;
     this.subscribed = false;
+  }
+
+  async rehydrate() {
+    if (!this.databasePlugin.client) {
+      throw new Error("The database plugin is not enabled on app instance: " + this.databasePlugin.app.ref.name);
+    }
+
+    const snap = await this.documentReference.get();
+    this.handleUpdate({ changeType: "update", newSnapshot: snap });
   }
 
   private handleUpdate(update: StreamChanges) {

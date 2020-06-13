@@ -1,25 +1,17 @@
-import { EventEmitter } from "eventemitter3";
 import * as jwtdecode from "jwt-decode";
 import App from "../app/App";
 import { AuthServiceToken, AuthStateChangeCallback, AuthUser, PostRegistrationCallback } from "./AuthTypes";
 import { AdamitePlugin } from "../app";
 import StorageProvider from "./StorageProvider";
 import LocalStorageProvider from "./LocalStorageProvider";
-import RelayClient from "@adamite/relay-client";
 
-class AuthPlugin extends EventEmitter implements AdamitePlugin {
-  public app: App;
-
-  public client?: RelayClient;
-
+class AuthPlugin extends AdamitePlugin {
   public currentToken: string | undefined;
 
   private storageProvider: StorageProvider;
 
-  private unsubscribeFromAuthStateChanges?: any;
-
   constructor(app: App) {
-    super();
+    super(app);
     this.app = app;
     this.storageProvider = new LocalStorageProvider();
     this.loadInitialAuthState();
@@ -27,47 +19,6 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
 
   getPluginName() {
     return "auth";
-  }
-
-  initialize() {
-    this.client = new RelayClient({
-      service: "auth",
-      url: this.app.getServiceUrl("auth"),
-      apiKey: this.app.config.apiKey,
-      secret: this.app.config.secret
-    });
-
-    this.client.on("connect", () => {
-      this.app.log("auth", "connected");
-    });
-
-    this.client.on("disconnect", (r: any) => {
-      this.app.log("auth", "disconnected");
-      console.log(r);
-    });
-
-    this.client.on("error", (r: any) => {
-      this.app.log("auth", "error");
-      console.log(r);
-    });
-
-    this.unsubscribeFromAuthStateChanges = this.onAuthStateChange(authState => {
-      if (!this.client) return;
-
-      if (authState) {
-        this.client.updateJwt(authState.token);
-      } else {
-        this.client.updateJwt(undefined);
-      }
-    });
-  }
-
-  disconnect() {
-    this.client?.disconnect();
-    
-    if (this.unsubscribeFromAuthStateChanges) {
-      this.unsubscribeFromAuthStateChanges();
-    }
   }
 
   useProvider(provider: StorageProvider) {
@@ -202,5 +153,4 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 }
 
-(AuthPlugin as any).PLUGIN_NAME = "auth";
 export default AuthPlugin;
