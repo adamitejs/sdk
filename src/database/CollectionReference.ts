@@ -1,11 +1,18 @@
-import qs from "querystring";
 import DocumentReference from "./DocumentReference";
 import DatabaseReference from "./DatabaseReference";
-import { CollectionQuery, CollectionSnapshotCallback, StreamChanges, CollectionStreamCallback, Join } from "./DatabaseTypes";
+import {
+  CollectionQuery,
+  CollectionSnapshotCallback,
+  StreamChanges,
+  CollectionStreamCallback,
+  CollectionWhereComparision,
+  Join
+} from "./DatabaseTypes";
 import CollectionSnapshot from "./CollectionSnapshot";
 import { DocumentSnapshot, DatabasePlugin } from ".";
 import { DatabaseSerializer, DatabaseDeserializer } from "../serialization";
 import { App } from "../app";
+import { Buffer } from "buffer";
 
 class CollectionReference {
   public name: string;
@@ -44,7 +51,7 @@ class CollectionReference {
     return this;
   }
 
-  where(field: string, operator: string, value: string) {
+  where(field: string, operator: CollectionWhereComparision, value: any) {
     this.query.where.push([field, operator, value]);
     return this;
   }
@@ -58,6 +65,10 @@ class CollectionReference {
     const app = App.getApp(this.database.app.name);
     const { client } = app.plugins.database as DatabasePlugin;
 
+    if (!client) {
+      throw new Error("The database plugin is not enabled on app instance: " + app.ref.name);
+    }
+
     const { snapshot } = await client.invoke("createDocument", {
       ref: DatabaseSerializer.serializeCollectionReference(this),
       data
@@ -69,6 +80,10 @@ class CollectionReference {
   async get(): Promise<CollectionSnapshot> {
     const app = App.getApp(this.database.app.name);
     const { client } = app.plugins.database as DatabasePlugin;
+
+    if (!client) {
+      throw new Error("The database plugin is not enabled on app instance: " + app.ref.name);
+    }
 
     const { snapshot } = await client.invoke("readCollection", {
       ref: DatabaseSerializer.serializeCollectionReference(this)

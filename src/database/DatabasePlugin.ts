@@ -1,5 +1,3 @@
-import querystring from "querystring";
-import client from "@adamite/relay-client";
 import DatabaseReference from "./DatabaseReference";
 import DocumentStream from "./DocumentStream";
 import CollectionStream from "./CollectionStream";
@@ -7,16 +5,18 @@ import App from "../app/App";
 import DocumentReference from "./DocumentReference";
 import CollectionReference from "./CollectionReference";
 import { AdamitePlugin } from "../app";
-import RelayClient from "@adamite/relay-client/dist/RelayClient";
+import RelayClient from "@adamite/relay-client";
 
 class DatabasePlugin implements AdamitePlugin {
   public app: App;
 
-  public client: any;
+  public client?: RelayClient;
 
   private documentStreamCache: any;
 
   private collectionStreamCache: any;
+
+  private unsubscribeFromAuthStateChanges?: any;
 
   constructor(app: App) {
     this.app = app;
@@ -25,16 +25,16 @@ class DatabasePlugin implements AdamitePlugin {
   }
 
   initialize(): void {
-    this.client = client({
+    this.client = new RelayClient({
       service: "database",
-      url: this.app.config.databaseUrl,
+      url: this.app.getServiceUrl("database"),
       apiKey: this.app.config.apiKey,
       jwt: this.app.plugins["auth"] && this.app.auth().currentToken,
       secret: this.app.config.secret
     });
 
     if (this.app.plugins["auth"]) {
-      this.app.auth().onAuthStateChange(authState => {
+      this.unsubscribeFromAuthStateChanges = this.app.auth().onAuthStateChange(authState => {
         if (!this.client) return;
 
         if (authState) {
@@ -58,6 +58,16 @@ class DatabasePlugin implements AdamitePlugin {
       this.app.log("database", "error");
       console.log(r);
     });
+  }
+
+  disconnect() {
+    if (this.unsubscribeFromAuthStateChanges) {
+      this.unsubscribeFromAuthStateChanges();
+    }
+
+    if (this.client) {
+      this.client.disconnect();
+    }
   }
 
   getPluginName(): string {
@@ -88,7 +98,7 @@ class DatabasePlugin implements AdamitePlugin {
    * the registration of handlers for updates of the corresponding CollectionSnapshot.
    */
   collectionStream(collectionReference: CollectionReference): CollectionStream {
-    const hashKey = collectionReference.name;
+    const hashKey = collectionReference.hash;
     var hashValue = this.collectionStreamCache[hashKey];
 
     if (hashValue == undefined) {
@@ -100,17 +110,12 @@ class DatabasePlugin implements AdamitePlugin {
     }
   }
 
-  get url() {
-    const qs = querystring.stringify({
-      key: this.app.config.apiKey,
-      ...(this.app.config.queryString || {})
-    });
-
-    return `${this.app.config.databaseUrl}?${qs}`;
+  database(name = "default"): DatabaseReference {
+    return new DatabaseReference(name, this.app.ref);
   }
 
-  database(name = "default") {
-    return new DatabaseReference(name, this.app.ref);
+  collection(name: string): CollectionReference {
+    return this.database().collection(name);
   }
 }
 

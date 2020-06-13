@@ -4,6 +4,7 @@ import { App } from "../app";
 import DatabasePlugin from "./DatabasePlugin";
 import { DatabaseSerializer, DatabaseDeserializer } from "../serialization";
 import { DocumentSnapshotCallback, StreamChanges, DocumentStreamCallback, UpdateOptions, Join } from "./DatabaseTypes";
+import { Buffer } from "buffer";
 
 class DocumentReference {
   public id: string;
@@ -27,6 +28,10 @@ class DocumentReference {
     const app = App.getApp(this.collection.database.app.name);
     const { client } = app.plugins.database as DatabasePlugin;
 
+    if (!client) {
+      throw new Error("The database plugin is not enabled on app instance: " + app.ref.name);
+    }
+
     const { snapshot } = await client.invoke("readDocument", {
       ref: DatabaseSerializer.serializeDocumentReference(this)
     });
@@ -37,6 +42,10 @@ class DocumentReference {
   async update(data: any, options?: UpdateOptions): Promise<DocumentSnapshot> {
     const app = App.getApp(this.collection.database.app.name);
     const { client } = app.plugins.database as DatabasePlugin;
+
+    if (!client) {
+      throw new Error("The database plugin is not enabled on app instance: " + app.ref.name);
+    }
 
     const { snapshot } = await client.invoke("updateDocument", {
       ref: DatabaseSerializer.serializeDocumentReference(this),
@@ -50,6 +59,10 @@ class DocumentReference {
   async delete(): Promise<DocumentSnapshot> {
     const app = App.getApp(this.collection.database.app.name);
     const { client } = app.plugins.database as DatabasePlugin;
+
+    if (!client) {
+      throw new Error("The database plugin is not enabled on app instance: " + app.ref.name);
+    }
 
     const { snapshot } = await client.invoke("deleteDocument", {
       ref: DatabaseSerializer.serializeDocumentReference(this)

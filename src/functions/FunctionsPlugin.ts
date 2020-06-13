@@ -1,29 +1,29 @@
-import querystring from "querystring";
-import client from "@adamite/relay-client";
 import App from "../app/App";
 import { AdamitePlugin } from "../app";
-import RelayClient from "@adamite/relay-client/dist/RelayClient";
-import { FunctionInvocation } from "./FunctionsTypes";
+import RelayClient from "@adamite/relay-client";
 
-class DatabasePlugin implements AdamitePlugin {
+class FunctionsPlugin implements AdamitePlugin {
   public app: App;
 
   public client?: RelayClient;
+
+  private unsubscribeFromAuthStateChanges?: any;
 
   constructor(app: App) {
     this.app = app;
   }
 
   initialize(): void {
-    this.client = client({
+    this.client = new RelayClient({
       service: "functions",
-      url: this.app.config.functionsUrl,
+      url: this.app.getServiceUrl("functions"),
       apiKey: this.app.config.apiKey,
-      jwt: this.app.plugins["auth"] && this.app.auth().currentToken
+      jwt: this.app.plugins["auth"] && this.app.auth().currentToken,
+      secret: this.app.config.secret
     });
 
     if (this.app.plugins["auth"]) {
-      this.app.auth().onAuthStateChange(authState => {
+      this.unsubscribeFromAuthStateChanges = this.app.auth().onAuthStateChange(authState => {
         if (!this.client) return;
 
         if (authState) {
@@ -49,29 +49,30 @@ class DatabasePlugin implements AdamitePlugin {
     });
   }
 
+  disconnect() {
+    if (this.unsubscribeFromAuthStateChanges) {
+      this.unsubscribeFromAuthStateChanges();
+    }
+
+    if (this.client) {
+      this.client.disconnect();
+    }
+  }
+
   getPluginName(): string {
     return "functions";
   }
 
-  async invoke(functionName: string, args: any | undefined) {
-    if (!this.client) return;
+  async invoke<T = any>(functionName: string, args: any | undefined): Promise<T> {
+    if (!this.client) return Promise.reject("Client is not connected");
 
-    const { returnValue } = (await this.client.invoke("invoke", {
+    const returnValue = await this.client.invoke("invoke", {
       name: functionName,
       args
-    })) as FunctionInvocation;
-
-    return returnValue;
-  }
-
-  get url() {
-    const qs = querystring.stringify({
-      key: this.app.config.apiKey,
-      ...(this.app.config.queryString || {})
     });
 
-    return `${this.app.config.databaseUrl}?${qs}`;
+    return returnValue as T;
   }
 }
 
-export default DatabasePlugin;
+export default FunctionsPlugin;

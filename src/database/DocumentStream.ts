@@ -57,6 +57,10 @@ class DocumentStream {
   private async subscribe() {
     if (this.subscribed) return;
 
+    if (!this.databasePlugin.client) {
+      throw new Error("The database plugin is not enabled on app instance: " + this.databasePlugin.app.ref.name);
+    }
+
     const { subscription } = await this.databasePlugin.client.invoke("subscribeDocument", {
       ref: DatabaseSerializer.serializeDocumentReference(this.documentReference)
     });
@@ -69,6 +73,10 @@ class DocumentStream {
 
   private async unsubscribe() {
     if (!this.subscribed) return;
+
+    if (!this.databasePlugin.client) {
+      throw new Error("The database plugin is not enabled on app instance: " + this.databasePlugin.app.ref.name);
+    }
 
     await this.databasePlugin.client.invoke("unsubscribe", {
       subscriptionId: this.subscriptionId

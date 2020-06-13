@@ -1,21 +1,28 @@
-import client from "@adamite/relay-client";
-import { EventEmitter } from "events";
+import { EventEmitter } from "eventemitter3";
 import * as jwtdecode from "jwt-decode";
 import App from "../app/App";
 import { AuthServiceToken, AuthStateChangeCallback, AuthUser, PostRegistrationCallback } from "./AuthTypes";
 import { AdamitePlugin } from "../app";
+import StorageProvider from "./StorageProvider";
+import LocalStorageProvider from "./LocalStorageProvider";
+import RelayClient from "@adamite/relay-client";
 
 class AuthPlugin extends EventEmitter implements AdamitePlugin {
   public app: App;
 
-  public client: any;
+  public client?: RelayClient;
 
   public currentToken: string | undefined;
+
+  private storageProvider: StorageProvider;
+
+  private unsubscribeFromAuthStateChanges?: any;
 
   constructor(app: App) {
     super();
     this.app = app;
-    this.loadAuthState();
+    this.storageProvider = new LocalStorageProvider();
+    this.loadInitialAuthState();
   }
 
   getPluginName() {
@@ -23,9 +30,9 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 
   initialize() {
-    this.client = client({
+    this.client = new RelayClient({
       service: "auth",
-      url: this.app.config.authUrl,
+      url: this.app.getServiceUrl("auth"),
       apiKey: this.app.config.apiKey,
       secret: this.app.config.secret
     });
@@ -43,6 +50,29 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
       this.app.log("auth", "error");
       console.log(r);
     });
+
+    this.unsubscribeFromAuthStateChanges = this.onAuthStateChange(authState => {
+      if (!this.client) return;
+
+      if (authState) {
+        this.client.updateJwt(authState.token);
+      } else {
+        this.client.updateJwt(undefined);
+      }
+    });
+  }
+
+  disconnect() {
+    this.client?.disconnect();
+    
+    if (this.unsubscribeFromAuthStateChanges) {
+      this.unsubscribeFromAuthStateChanges();
+    }
+  }
+
+  useProvider(provider: StorageProvider) {
+    this.storageProvider = provider;
+    this.loadInitialAuthState();
   }
 
   get currentUser(): AuthUser | undefined {
@@ -60,7 +90,7 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
   }
 
   async createUser(email: string, password: string, postRegistration?: PostRegistrationCallback, bypassLogin?: boolean) {
-    const { token } = await this.client.invoke("createUser", {
+    const { token } = await this.client?.invoke("createUser", {
       email,
       password,
       bypassLogin
@@ -71,30 +101,59 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     this.currentToken = token;
     if (postRegistration) await postRegistration(this.currentUser);
 
-    this.saveAuthState(token);
+    await this.saveAuthState(token);
     return this.currentUser;
   }
 
   async loginWithEmailAndPassword(email: string, password: string) {
-    const { token } = await this.client.invoke("loginWithEmailAndPassword", {
+    const { token } = await this.client?.invoke("loginWithEmailAndPassword", {
       email,
       password
     });
 
-    this.saveAuthState(token);
+    await this.saveAuthState(token);
     return this.currentUser;
   }
 
+  async changePassword(oldPassword: string, newPassword: string) {
+    if (!this.currentToken) {
+      throw new Error("Can't change password because the user is not logged in.");
+    }
+
+    const { token } = await this.client?.invoke("changePassword", {
+      oldPassword,
+      newPassword
+    });
+
+    
+    await this.saveAuthState(token);
+    this.emit("authStateChange", this.currentUser);
+  }
+
+  async changeEmail(password: string, email: string) {
+    if (!this.currentToken) {
+      throw new Error("Can't change email because the user is not logged in.");
+    }
+
+    const { token } = await this.client?.invoke("changeEmail", {
+      password,
+      email
+    });
+
+    await this.saveAuthState(token);
+    this.emit("authStateChange", this.currentUser);
+  }
+
   async validateToken(token: string) {
-    const { data } = await this.client.invoke("validateToken", {
+    const { data } = await this.client?.invoke("validateToken", {
       token
     });
 
     return data;
   }
 
-  logout() {
-    this.clearAuthState();
+  async logout() {
+    await this.clearAuthState();
   }
 
   onAuthStateChange(callback: AuthStateChangeCallback): () => void {
@@ -104,6 +163,11 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     return () => {
       this.off("authStateChange", callback);
     };
+  }
+
+  private async loadInitialAuthState() {
+    await this.loadAuthState();
+    this.emit("authStateChange", this.currentUser);
   }
 
   private checkForExpiredToken() {
@@ -119,29 +183,22 @@ class AuthPlugin extends EventEmitter implements AdamitePlugin {
     }
   }
 
-  private loadAuthState() {
-    if (typeof window === "undefined" || !window.localStorage) return;
-
-    const tokenKey = `adamite:auth:${this.app.ref.name}.token`;
-    const localStorageToken = window.localStorage.getItem(tokenKey);
-
-    this.currentToken = localStorageToken || undefined;
+  private async loadAuthState() {
+    const token = await this.storageProvider.getToken(this.app.ref.name);
+    this.currentToken = token || undefined;
     this.checkForExpiredToken();
   }
 
-  private saveAuthState(token: string) {
+  private async saveAuthState(token: string) {
     this.currentToken = token;
     this.emit("authStateChange", this.currentUser);
-    if (typeof window === "undefined" || !window.localStorage) return;
-    const tokenKey = `adamite:auth:${this.app.ref.name}.token`;
-    window.localStorage.setItem(tokenKey, token);
+    await this.storageProvider.saveToken(this.app.ref.name, token);
   }
 
-  private clearAuthState() {
+  private async clearAuthState() {
     this.currentToken = undefined;
     this.emit("authStateChange", this.currentUser);
-    if (typeof window === "undefined" || !window.localStorage) return;
-    window.localStorage.removeItem(`adamite:auth:${this.app.ref.name}.token`);
+    await this.storageProvider.clearToken(this.app.ref.name);
   }
 }
 

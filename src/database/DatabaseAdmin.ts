@@ -14,6 +14,10 @@ class DatabaseAdmin {
     const app = App.getApp(this.ref.app.name);
     const { client } = app.plugins.database as DatabasePlugin;
 
+    if (!client) {
+      throw new Error("The database plugin is not enabled on app instance: " + app.ref.name);
+    }
+
     const { collections } = await client.invoke("admin.getCollections", {
       ref: DatabaseSerializer.serializeDatabaseReference(this.ref)
     });

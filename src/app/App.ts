@@ -1,46 +1,51 @@
 import { merge } from "lodash";
 import AppReference from "./AppReference";
 import AdamitePlugin from "./AdamitePlugin";
-import { DatabaseReference } from "../database";
+import { DatabasePlugin } from "../database";
 import { AuthPlugin } from "../auth";
 import { FunctionsPlugin } from "../functions";
+import { FullAdamiteConfig, AdamiteConfig } from "./AppTypes";
 
 class App {
   public ref: AppReference;
 
   public plugins: { [name: string]: AdamitePlugin };
 
-  public config: { [key: string]: any };
+  public config: FullAdamiteConfig;
 
   constructor(ref: AppReference) {
     this.ref = ref;
     this.plugins = {};
-    this.config = { logLevel: 0 };
+    this.config = { serviceUrls: {}, apiKey: "", logLevel: 0 };
   }
 
-  use(plugin: AdamitePlugin) {
-    const pluginInstance = new (plugin as any)(this) as AdamitePlugin;
+  use(plugin: { new (app: App): AdamitePlugin }) {
+    const pluginInstance = new plugin(this) as AdamitePlugin;
     const pluginName = pluginInstance.getPluginName();
     this.plugins[pluginName] = pluginInstance;
     return this;
   }
 
-  initializeApp(config: any) {
+  initializeApp(config: AdamiteConfig) {
     this.config = merge(this.config, config);
     this.initializePlugins();
     return this;
+  }
+
+  disconnect() {
+    Object.keys(this.plugins).forEach(pluginId => this.plugins[pluginId].disconnect());
   }
 
   plugin(name: string) {
     return this.plugins[name];
   }
 
-  database(name: string = "default"): DatabaseReference {
+  database(): DatabasePlugin {
     if (!this.plugins.database) {
       throw new Error("The database plugin is not enabled on app instance: " + this.ref.name);
     }
 
-    return new DatabaseReference(name, this.ref);
+    return this.plugins.database as DatabasePlugin;
   }
 
   auth(): AuthPlugin {
@@ -61,17 +66,27 @@ class App {
 
   log(plugin: string, message: string) {
     if (this.config.logLevel < 0) return;
-    console.log(`⚡ [${plugin}]\t${message}`);
+    console.log(`⚡ [${this.ref.name}.${plugin}]\t${message}`);
   }
 
   warn(plugin: string, message: string) {
     if (this.config.logLevel < 1) return;
-    console.warn(`⚡ [${plugin}]\t${message}`);
+    console.warn(`⚡ [${this.ref.name}.${plugin}]\t${message}`);
   }
 
   error(plugin: string, message: string) {
     if (this.config.logLevel < 2) return;
-    console.error(`⚡ [${plugin}]\t${message}`);
+    console.error(`⚡ [${this.ref.name}.${plugin}]\t${message}`);
+  }
+
+  getServiceUrl(serviceName: string) {
+    const serviceUrl = this.config.serviceUrls[serviceName] || this.config.url;
+
+    if (!serviceUrl) {
+      throw new Error(`Service URL is not defined for ${serviceName}`);
+    }
+
+    return serviceUrl;
   }
 
   private initializePlugins() {

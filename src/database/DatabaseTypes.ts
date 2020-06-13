@@ -4,7 +4,19 @@ import CollectionReference from "./CollectionReference";
 
 export type CollectionOrderByRule = string[];
 
-export type CollectionWhereRule = string[];
+export type CollectionWhereComparision =
+  | "=="
+  | "!="
+  | ">"
+  | "<"
+  | ">="
+  | "<="
+  | "array-contains"
+  | "array-not-contains"
+  | "matches"
+  | "not-matches";
+
+export type CollectionWhereRule = [string, CollectionWhereComparision, any];
 
 export type CollectionQuery = {
   limit: number;
