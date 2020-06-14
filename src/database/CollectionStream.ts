@@ -2,15 +2,15 @@ import DatabaseSerializer from "../serialization/DatabaseSerializer";
 import DocumentSnapshot from "./DocumentSnapshot";
 import DatabasePlugin from "./DatabasePlugin";
 import CollectionReference from "./CollectionReference";
-import CollectionSnapshot from "./CollectionSnapshot";
 import { CollectionStreamCallback, StreamChanges } from "./DatabaseTypes";
+import { EventEmitter } from "eventemitter3";
 
 /**
  * A CollectionSream is responsible for establishing a subscription to a collection,
  * routing updates to that collection to handlers, and providing handlers with the
  * most recent version of the collection should they request it on connection.
  */
-class CollectionStream {
+class CollectionStream extends EventEmitter {
   public databasePlugin: DatabasePlugin;
 
   public collectionReference: CollectionReference;
@@ -30,6 +30,7 @@ class CollectionStream {
    * @param {CollectionReference} collectionReference
    */
   constructor(databasePlugin: DatabasePlugin, collectionReference: CollectionReference) {
+    super();
     this.databasePlugin = databasePlugin;
     this.collectionReference = collectionReference;
     this.handlers = [];
@@ -71,6 +72,7 @@ class CollectionStream {
     this.databasePlugin.client.socket.on(subscription.id, this.handleUpdate.bind(this));
 
     this.subscriptionId = subscription.id;
+    this.emit("subscribe");
   }
 
   async unsubscribe() {
@@ -86,18 +88,7 @@ class CollectionStream {
 
     this.subscriptionId = undefined;
     this.subscribed = false;
-  }
-
-  async rehydrate() {
-    if (!this.databasePlugin.client) {
-      throw new Error("The database plugin is not enabled on app instance: " + this.databasePlugin.app.ref.name);
-    }
-
-    const snap = await this.collectionReference.get();
-
-    snap.docs.forEach(snap => {
-      this.handleUpdate({ changeType: "update", newSnapshot: snap });
-    });
+    this.emit("unsubscribe");
   }
 
   private handleUpdate(update: StreamChanges) {

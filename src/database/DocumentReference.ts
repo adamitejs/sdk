@@ -70,18 +70,31 @@ class DocumentReference {
   }
 
   onSnapshot(callback: DocumentSnapshotCallback): () => void {
-    this.sendInitialSnapshot(callback);
-
-    return this.stream(({ changeType, newSnapshot, oldSnapshot }: StreamChanges) => {
-      if (!newSnapshot) return;
-      callback(newSnapshot, { newSnapshot, oldSnapshot, changeType });
-    });
+    return this.stream(
+      ({ changeType, newSnapshot, oldSnapshot }: StreamChanges) => {
+        if (!newSnapshot) return;
+        callback(newSnapshot, { newSnapshot, oldSnapshot, changeType });
+      },
+      () => {
+        this.sendInitialSnapshot(callback);
+      }
+    );
   }
 
-  stream(callback: DocumentStreamCallback): () => void {
+  stream(callback: DocumentStreamCallback, onSubscribe?: () => void, onUnsubscribe?: () => void): () => void {
     const app = App.getApp(this.collection.database.app.name);
     const database = app.plugins.database as DatabasePlugin;
-    database.documentStream(this).register(callback);
+    const documentStream = database.documentStream(this);
+
+    if (onSubscribe) {
+      documentStream.on("subscribe", onSubscribe);
+    }
+
+    if (onUnsubscribe) {
+      documentStream.on("unsubscribe", onUnsubscribe);
+    }
+
+    documentStream.register(callback);
 
     return () => {
       database.documentStream(this).unregister(callback);

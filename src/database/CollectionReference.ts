@@ -87,20 +87,35 @@ class CollectionReference {
   onSnapshot(callback: CollectionSnapshotCallback): () => void {
     this.sendInitialSnapshot(callback);
 
-    return this.stream(({ changeType, oldSnapshot, newSnapshot }: StreamChanges) => {
-      // create the in-memory snapshot if needed
-      this.snapshot = this.snapshot || new CollectionSnapshot(this);
+    return this.stream(
+      ({ changeType, oldSnapshot, newSnapshot }: StreamChanges) => {
+        // create the in-memory snapshot if needed
+        this.snapshot = this.snapshot || new CollectionSnapshot(this);
 
-      // mutate the in-memory snapshot, and send it in the callback
-      this.snapshot = this.snapshot.mutate(changeType, oldSnapshot, newSnapshot);
-      callback(this.snapshot, { newSnapshot, oldSnapshot, changeType });
-    });
+        // mutate the in-memory snapshot, and send it in the callback
+        this.snapshot = this.snapshot.mutate(changeType, oldSnapshot, newSnapshot);
+        callback(this.snapshot, { newSnapshot, oldSnapshot, changeType });
+      },
+      () => {
+        this.sendInitialSnapshot(callback);
+      }
+    );
   }
 
-  stream(callback: CollectionStreamCallback): () => void {
+  stream(callback: CollectionStreamCallback, onSubscribe?: () => void, onUnsubscribe?: () => void): () => void {
     const app = App.getApp(this.database.app.name);
     const database = app.plugins.database as DatabasePlugin;
-    database.collectionStream(this).register(callback);
+    const collectionStream = database.collectionStream(this);
+
+    if (onSubscribe) {
+      collectionStream.on("subscribe", onSubscribe);
+    }
+
+    if (onUnsubscribe) {
+      collectionStream.on("unsubscribe", onUnsubscribe);
+    }
+
+    collectionStream.register(callback);
 
     return () => {
       database.collectionStream(this).unregister(callback);

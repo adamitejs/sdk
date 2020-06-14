@@ -22,11 +22,9 @@ class DatabasePlugin extends AdamitePlugin {
     this.client!.on("connect", () => {
       Object.values(this.documentStreamCache).forEach(stream => {
         stream.subscribe();
-        stream.rehydrate();
       });
       Object.values(this.collectionStreamCache).forEach(stream => {
         stream.subscribe();
-        stream.rehydrate();
       });
     });
 

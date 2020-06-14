@@ -3,13 +3,14 @@ import DocumentSnapshot from "./DocumentSnapshot";
 import DatabasePlugin from "./DatabasePlugin";
 import DocumentReference from "./DocumentReference";
 import { DocumentStreamCallback, StreamChanges } from "./DatabaseTypes";
+import { EventEmitter } from "eventemitter3";
 
 /**
  * A DocumentStream is responsible for establishing a subscription to a document,
  * routing updates to that document to handlers, and providing handlers with the
  * most recent version of the document should they request it on connection.
  */
-class DocumentStream {
+class DocumentStream extends EventEmitter {
   public databasePlugin: DatabasePlugin;
 
   public documentReference: DocumentReference;
@@ -29,6 +30,7 @@ class DocumentStream {
    * @param {DocumentReference} documentReference
    */
   constructor(databasePlugin: DatabasePlugin, documentReference: DocumentReference) {
+    super();
     this.databasePlugin = databasePlugin;
     this.documentReference = documentReference;
     this.handlers = [];
@@ -70,6 +72,7 @@ class DocumentStream {
     this.databasePlugin.client.socket.on(subscription.id, this.handleUpdate.bind(this));
 
     this.subscriptionId = subscription.id;
+    this.emit("subscribe");
   }
 
   async unsubscribe() {
@@ -85,15 +88,7 @@ class DocumentStream {
 
     this.subscriptionId = undefined;
     this.subscribed = false;
-  }
-
-  async rehydrate() {
-    if (!this.databasePlugin.client) {
-      throw new Error("The database plugin is not enabled on app instance: " + this.databasePlugin.app.ref.name);
-    }
-
-    const snap = await this.documentReference.get();
-    this.handleUpdate({ changeType: "update", newSnapshot: snap });
+    this.emit("unsubscribe");
   }
 
   private handleUpdate(update: StreamChanges) {
